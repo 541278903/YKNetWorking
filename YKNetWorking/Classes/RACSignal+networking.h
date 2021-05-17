@@ -7,6 +7,7 @@
 //
 
 #import <ReactiveObjC/ReactiveObjC.h>
+#import "YKBlockTrampoline.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
