@@ -439,7 +439,7 @@
 
 + (void)uploadToUrl:(NSString *)url params:(NSDictionary *)params data:(NSData *)data filename:(NSString *)filename mimeType:(NSString *)mimeType progress:(progressBlockType)progress complateBlock:(complateBlockType)complateBlock
 {
-    [[[[YKNetWorking alloc] init].post(url).params(params).progress(progress).uploadData(data,filename,mimeType).uploadDataSignal.mapWithRawData doError:^(NSError * _Nonnull error) {
+    [[[[YKNetWorking alloc] init].post(url).disableDynamicParams.disableDynamicHeader.disableHandleResponse.params(params).progress(progress).uploadData(data,filename,mimeType).uploadDataSignal.mapWithRawData doError:^(NSError * _Nonnull error) {
         complateBlock(nil,error);
     }] subscribeNext:^(id  _Nullable x) {
         complateBlock(x,nil);
