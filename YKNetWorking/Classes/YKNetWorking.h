@@ -13,6 +13,7 @@
 #import "YKNetworkResponse.h"
 #import "YKNetworkingConfig.h"
 #import "RACSignal+networking.h"
+#import "YKBlockTrampoline.h"
 
 #define get(urlStr) url(urlStr).method(YKNetworkRequestMethodGET)
 #define post(urlStr) url(urlStr).method(YKNetworkRequestMethodPOST)
@@ -28,9 +29,11 @@
 
 #define kNoCacheErrorCode -10992
 
-
 /// 监听网络状态的通知
-static NSString *kYKNetworking_NetworkStatus = @"kYKNetworking_NetworkStatus";
+#define kYKNetworking_NetworkStatus @"kYKNetworking_NetworkStatus"
+
+
+//static NSString *kYKNetworking_NetworkStatus = @"kYKNetworking_NetworkStatus";
 
 
 @protocol YKNetWorkingDelegate <NSObject>
