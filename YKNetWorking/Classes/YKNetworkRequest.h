@@ -21,6 +21,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface YKNetworkRequest : NSObject<NSCopying>
 
+/** 唯一标识符 */
+@property (nonatomic, copy) NSString *name;
+
 /** 请求地址 */
 @property (nonatomic, copy)   NSString *urlStr;
 
@@ -73,8 +76,6 @@ NS_ASSUME_NONNULL_BEGIN
 /** 处理AF请求体: 特殊情况下需要修改时使用 一般可以不用 */
 @property (nonatomic, copy) AFHTTPRequestSerializer *(^requestSerializerBlock)(AFHTTPRequestSerializer *);
 
-/** 唯一标识符 */
-@property (nonatomic, copy) NSString *name;
 
 /** SSL证书 */
 @property (nonatomic, copy) NSString *sslCerPath;
