@@ -226,7 +226,8 @@
     }
     __weak typeof(self) weakSelf = self;
     RACSignal *singal = [RACSignal createSignal:^RACDisposable * _Nullable(id<RACSubscriber>  _Nonnull subscriber) {
-        request.task = [weakSelf.manager dataTaskWithHTTPMethod:request.methodStr URLString:request.urlStr parameters:request.params headers:request.header uploadProgress:^(NSProgress * _Nonnull uploadProgress) {
+        __strong typeof(weakSelf) strongself = weakSelf;
+        request.task = [[AFHTTPSessionManager manager] dataTaskWithHTTPMethod:request.methodStr URLString:request.urlStr parameters:request.params headers:request.header uploadProgress:^(NSProgress * _Nonnull uploadProgress) {
             
         } downloadProgress:^(NSProgress * _Nonnull downloadProgress) {
             if(request.progressBlock)
@@ -236,32 +237,32 @@
         } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
             YKNetworkResponse *response = [[YKNetworkResponse alloc]init];
             response.rawData = responseObject;
-            if(weakSelf.handleResponse && !request.disableHandleResponse)
+            if(strongself.handleResponse && !request.disableHandleResponse)
             {
-                NSError *error = weakSelf.handleResponse(response,request);
+                NSError *error = strongself.handleResponse(response,request);
                 if (error) {
                     [subscriber sendError:error];
-                    [weakSelf saveTask:request response:response isException:YES];
+                    [strongself saveTask:request response:response isException:YES];
                 }else
                 {
                     [subscriber sendNext:RACTuplePack(request,response)];
-                    [weakSelf saveTask:request response:response isException:NO];
+                    [strongself saveTask:request response:response isException:NO];
                 }
             }else
             {
                 [subscriber sendNext:RACTuplePack(request,response)];
-                [weakSelf saveTask:request response:response isException:NO];
+                [strongself saveTask:request response:response isException:NO];
             }
             [subscriber sendCompleted];
         } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
             [subscriber sendError:error];
             YKNetworkResponse *response = [[YKNetworkResponse alloc]init];
             response.rawData = error.localizedDescription;
-            [weakSelf saveTask:request response:response isException:YES];
+            [strongself saveTask:request response:response isException:YES];
             [subscriber sendCompleted];
         }];
         [request.task resume];
-        weakSelf.request = nil;
+        strongself.request = nil;
         
         return nil;
     }];
@@ -283,8 +284,9 @@
     }
     __weak typeof(self) weakSelf = self;
     RACSignal *singal = [RACSignal createSignal:^RACDisposable * _Nullable(id<RACSubscriber>  _Nonnull subscriber) {
+        __strong typeof(weakSelf) strongself = weakSelf;
         if (request && request.uploadFileData&& request.uploadName&&request.uploadMimeType) {
-            request.task = [weakSelf.manager POST:request.urlStr parameters:request.params headers:request.header constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+            request.task = [[AFHTTPSessionManager manager] POST:request.urlStr parameters:request.params headers:request.header constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
                 [formData appendPartWithFileData:request.uploadFileData
                                             name:@"file"
                                         fileName:request.uploadName
@@ -296,21 +298,21 @@
             } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
                 YKNetworkResponse *response = [[YKNetworkResponse alloc]init];
                 response.rawData = responseObject;
-                if(weakSelf.handleResponse && !request.disableHandleResponse)
+                if(strongself.handleResponse && !request.disableHandleResponse)
                 {
-                    NSError *error = weakSelf.handleResponse(response,request);
+                    NSError *error = strongself.handleResponse(response,request);
                     if (error) {
                         [subscriber sendError:error];
-                        [weakSelf saveTask:request response:response isException:YES];
+                        [strongself saveTask:request response:response isException:YES];
                     }else
                     {
                         [subscriber sendNext:RACTuplePack(request,response)];
-                        [weakSelf saveTask:request response:response isException:NO];
+                        [strongself saveTask:request response:response isException:NO];
                     }
                 }else
                 {
                     [subscriber sendNext:RACTuplePack(request,response)];
-                    [weakSelf saveTask:request response:response isException:NO];
+                    [strongself saveTask:request response:response isException:NO];
                 }
                 [subscriber sendCompleted];
             } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
@@ -318,7 +320,7 @@
                 
                 YKNetworkResponse *response = [[YKNetworkResponse alloc]init];
                 response.rawData = error.localizedDescription;
-                [weakSelf saveTask:request response:response isException:YES];
+                [strongself saveTask:request response:response isException:YES];
                     [subscriber sendCompleted];
             }];
             [request.task resume];
@@ -331,11 +333,11 @@
             [subscriber sendError:err];
             YKNetworkResponse *response = [[YKNetworkResponse alloc]init];
             response.rawData = err.localizedDescription;
-            [weakSelf saveTask:request response:response isException:YES];
+            [strongself saveTask:request response:response isException:YES];
             [subscriber sendCompleted];
         }
         
-        weakSelf.request = nil;
+        strongself.request = nil;
         return nil;
     }];
     return singal;
@@ -357,11 +359,12 @@
     }
     __weak typeof(self) weakSelf = self;
     RACSignal *singal = [RACSignal createSignal:^RACDisposable * _Nullable(id<RACSubscriber>  _Nonnull subscriber) {
+        __strong typeof(weakSelf) strongself = weakSelf;
 
         NSURL *downloadURL = [NSURL URLWithString:request.urlStr];
 
         NSURLRequest *downloadRequest = [NSURLRequest requestWithURL:downloadURL];
-        request.downloadTask = [weakSelf.manager downloadTaskWithRequest:downloadRequest progress:^(NSProgress * _Nonnull downloadProgress) {
+        request.downloadTask = [[AFHTTPSessionManager manager] downloadTaskWithRequest:downloadRequest progress:^(NSProgress * _Nonnull downloadProgress) {
             if (request.progressBlock) {
                 request.progressBlock((float)downloadProgress.completedUnitCount / (float)downloadProgress.totalUnitCount);
             }
@@ -384,21 +387,21 @@
             YKNetworkResponse *responsed = [[YKNetworkResponse alloc]init];
             responsed.rawData = @{@"path": filePath.relativePath ?: @"", @"code":@200};
             if (!error) {
-                if(weakSelf.handleResponse && !request.disableHandleResponse)
+                if(strongself.handleResponse && !request.disableHandleResponse)
                 {
-                    NSError *errord = weakSelf.handleResponse(responsed,request);
+                    NSError *errord = strongself.handleResponse(responsed,request);
                     if (errord) {
                         [subscriber sendError:errord];
-                        [weakSelf saveTask:request response:responsed isException:YES];
+                        [strongself saveTask:request response:responsed isException:YES];
                     }else
                     {
                         [subscriber sendNext:RACTuplePack(request,responsed)];
-                        [weakSelf saveTask:request response:responsed isException:NO];
+                        [strongself saveTask:request response:responsed isException:NO];
                     }
                 }else
                 {
                     [subscriber sendNext:RACTuplePack(request,responsed)];
-                    [weakSelf saveTask:request response:responsed isException:NO];
+                    [strongself saveTask:request response:responsed isException:NO];
                 }
             }else
             {
@@ -407,7 +410,7 @@
             [subscriber sendCompleted];
         }];
         [request.downloadTask resume];
-        weakSelf.request = nil;
+        strongself.request = nil;
         return nil;
     }];
     return singal;
