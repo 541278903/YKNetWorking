@@ -105,7 +105,7 @@ typedef void(^progressBlockType)(float progress);
 - (YKNetWorking * (^)(NSString *url))url;
 
 /// 请求参数
-- (YKNetWorking * (^)(NSDictionary *params))params;
+- (YKNetWorking * (^)(NSDictionary *_Nullable params))params;
 
 /// 请求模式
 - (YKNetWorking * (^)(YKNetworkRequestMethod metohd))method;
@@ -187,19 +187,19 @@ typedef void(^progressBlockType)(float progress);
 /// @param url 请求地址
 /// @param params 请求参数
 /// @param complateBlock 请求回调
-+ (void)executeByMethod:(YKNetworkRequestMethod )method url:(NSString *)url params:(NSDictionary *)params ComplateBlock:(complateBlockType)complateBlock;
++ (void)executeByMethod:(YKNetworkRequestMethod )method url:(NSString *)url params:(NSDictionary * _Nullable)params ComplateBlock:(complateBlockType)complateBlock;
 
 /// get请求
 /// @param url 请求地址
 /// @param params 请求参数
 /// @param complateBlock 请求回调
-+ (void)getUrl:(NSString *)url params:(NSDictionary *)params ComplateBlock:(complateBlockType)complateBlock;
++ (void)getUrl:(NSString *)url params:(NSDictionary * _Nullable)params ComplateBlock:(complateBlockType)complateBlock;
 
 /// post请求
 /// @param url 请求地址
 /// @param params 请求参数
 /// @param complateBlock 请求回调
-+ (void)postUrl:(NSString *)url params:(NSDictionary *)params ComplateBlock:(complateBlockType)complateBlock;
++ (void)postUrl:(NSString *)url params:(NSDictionary * _Nullable)params ComplateBlock:(complateBlockType)complateBlock;
 
 /// 上传请求
 /// @param url 请求地址
@@ -209,7 +209,7 @@ typedef void(^progressBlockType)(float progress);
 /// @param mimeType mimeType
 /// @param progress 进度
 /// @param complateBlock 请求回调
-+ (void)uploadToUrl:(NSString *)url params:(NSDictionary *)params data:(NSData *)data filename:(NSString *)filename mimeType:(NSString *)mimeType progress:(progressBlockType)progress complateBlock:(complateBlockType)complateBlock;
++ (void)uploadToUrl:(NSString *)url params:(NSDictionary * _Nullable)params data:(NSData *)data filename:(NSString *)filename mimeType:(NSString *)mimeType progress:(progressBlockType)progress complateBlock:(complateBlockType)complateBlock;
 
 /// 下载请求
 /// @param fromUrl 请求地址

@@ -149,11 +149,13 @@
     return _request;
 }
 
-- (YKNetWorking * _Nonnull (^)(NSDictionary * _Nonnull))params
+- (YKNetWorking * _Nullable (^)(NSDictionary * _Nullable))params
 {
     return ^YKNetWorking *(NSDictionary *params){
-        NSMutableDictionary *reqParams = [NSMutableDictionary dictionaryWithDictionary:params];
-        [self.request.params setValuesForKeysWithDictionary:reqParams];
+        if (params) {
+            NSMutableDictionary *reqParams = [NSMutableDictionary dictionaryWithDictionary:params];
+            [self.request.params setValuesForKeysWithDictionary:reqParams];
+        }
         return self;
     };
 }
@@ -416,7 +418,7 @@
     return self.downloadDataSignal.mapWithRawData;
 }
 
-+ (void)executeByMethod:(YKNetworkRequestMethod )method url:(NSString *)url params:(NSDictionary *)params ComplateBlock:(complateBlockType)complateBlock
++ (void)executeByMethod:(YKNetworkRequestMethod )method url:(NSString *)url params:(NSDictionary * _Nullable)params ComplateBlock:(complateBlockType)complateBlock
 {
     if (complateBlock) {
         [[[[YKNetWorking alloc] init].url(url).method(method).disableDynamicParams.disableDynamicHeader.disableHandleResponse.params(params).executeSignal.mapWithRawData doError:^(NSError * _Nonnull error) {
@@ -427,17 +429,17 @@
     }
 }
 
-+ (void)getUrl:(NSString *)url params:(NSDictionary *)params ComplateBlock:(complateBlockType)complateBlock
++ (void)getUrl:(NSString *)url params:(NSDictionary * _Nullable)params ComplateBlock:(complateBlockType)complateBlock
 {
     [YKNetWorking executeByMethod:YKNetworkRequestMethodGET url:url params:params ComplateBlock:complateBlock];
 }
 
-+ (void)postUrl:(NSString *)url params:(NSDictionary *)params ComplateBlock:(complateBlockType)complateBlock
++ (void)postUrl:(NSString *)url params:(NSDictionary * _Nullable)params ComplateBlock:(complateBlockType)complateBlock
 {
     [YKNetWorking executeByMethod:YKNetworkRequestMethodPOST url:url params:params ComplateBlock:complateBlock];
 }
 
-+ (void)uploadToUrl:(NSString *)url params:(NSDictionary *)params data:(NSData *)data filename:(NSString *)filename mimeType:(NSString *)mimeType progress:(progressBlockType)progress complateBlock:(complateBlockType)complateBlock
++ (void)uploadToUrl:(NSString *)url params:(NSDictionary * _Nullable)params data:(NSData *)data filename:(NSString *)filename mimeType:(NSString *)mimeType progress:(progressBlockType)progress complateBlock:(complateBlockType)complateBlock
 {
     [[[[YKNetWorking alloc] init].post(url).disableDynamicParams.disableDynamicHeader.disableHandleResponse.params(params).progress(progress).uploadData(data,filename,mimeType).uploadDataSignal.mapWithRawData doError:^(NSError * _Nonnull error) {
         complateBlock(nil,error);
