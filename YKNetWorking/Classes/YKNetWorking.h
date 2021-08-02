@@ -11,7 +11,7 @@
 #import <Foundation/Foundation.h>
 #import "YKNetworkRequest.h"
 #import "YKNetworkResponse.h"
-#import "YKNetworkingConfig.h"
+#import "YKBaseNetWorking.h"
 #import "RACSignal+networking.h"
 #import "YKBlockTrampoline.h"
 
@@ -53,10 +53,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface YKNetWorking : NSObject
 
-
-typedef void(^complateBlockType)( id _Nullable responData ,NSError * _Nullable error);
-
-typedef void(^progressBlockType)(float progress);
 
 #pragma mark ----------------------只读属性-----------------------------
 
@@ -130,6 +126,9 @@ typedef void(^progressBlockType)(float progress);
 
 /// 下载目的路径
 - (YKNetWorking *(^)(NSString *destPath))downloadDestPath;
+
+/// 虚拟回调 设置虚拟回调则原本的请求则不会进行请求直接返回虚拟内容
+- (YKNetWorking *(^)(id mockData))mockData;
 
 /// 取消当前所有请求
 - (void)cancelAllRequest;

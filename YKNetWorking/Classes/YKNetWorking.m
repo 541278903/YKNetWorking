@@ -216,6 +216,16 @@
     };
 }
 
+
+/// 虚拟回调 设置虚拟回调则原本的请求则不会进行请求直接返回虚拟内容
+- (YKNetWorking * _Nonnull (^)(id _Nonnull mockData))mockData
+{
+    return ^YKNetWorking *(id _Nonnull mockData){
+        self.request.mockData = mockData;
+        return self;
+    };
+}
+
 - (RACSignal<RACTuple *> *)executeSignal
 {
     YKNetworkRequest *request = [self.request copy];
@@ -560,10 +570,13 @@
 
 - (void)saveTask:(YKNetworkRequest *)request response:(YKNetworkResponse *)response isException:(BOOL)isException
 {
+    //系统回调执行
     if ([YKNetworkingConfig defaultConfig].cacheRequest)
     {
         [YKNetworkingConfig defaultConfig].cacheRequest(response, request, isException);
-    }else if (self.delegate && [self.delegate respondsToSelector:@selector(cacheRequest:resonse:isException:)])
+    }
+    //本类代理回调
+    if (self.delegate && [self.delegate respondsToSelector:@selector(cacheRequest:resonse:isException:)])
     {
         [self.delegate cacheRequest:request resonse:response isException:isException];
     }

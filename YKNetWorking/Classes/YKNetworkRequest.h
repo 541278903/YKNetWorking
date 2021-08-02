@@ -69,9 +69,10 @@ NS_ASSUME_NONNULL_BEGIN
 /** 起始时间 */
 @property(nonatomic,assign) NSTimeInterval startTimeInterval;
 
-#pragma mark -----------❌unUse❌(后续拓展才会真正使用到，敬请期待)------------
 /** 假数据 */
 @property (nonatomic, strong) id<NSCopying> mockData;
+
+#pragma mark -----------❌unUse❌(后续拓展才会真正使用到，敬请期待)------------
 
 /** 处理AF请求体: 特殊情况下需要修改时使用 一般可以不用 */
 @property (nonatomic, copy) AFHTTPRequestSerializer *(^requestSerializerBlock)(AFHTTPRequestSerializer *);
