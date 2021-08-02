@@ -226,6 +226,31 @@
     };
 }
 
+/** 请求体类型 默认二进制形式 */
+- (YKNetWorking * (^)(YKNetworkRequestParamsType paramsType))paramsType {
+    return ^YKNetWorking *(YKNetworkRequestParamsType paramsType) {
+        self.request.paramsType = paramsType;
+        return self;
+    };
+}
+
+- (void)handleRequestSerialization:(AFHTTPRequestSerializer *(^)(AFHTTPRequestSerializer *serializer))requestSerializerBlock
+{
+    if (requestSerializerBlock) {
+        self.request.requestSerializerBlock = requestSerializerBlock;
+    }
+}
+
+/**
+ 处理AF响应体,普通情况下无需调用,有特殊需求时才需要拦截AF的响应体进行修改
+ */
+- (void)handleResponseSerialization:(AFHTTPResponseSerializer *(^)(AFHTTPResponseSerializer *serializer))responseSerializerBlock
+{
+    if (responseSerializerBlock) {
+        self.request.responseSerializerBlock = responseSerializerBlock;
+    }
+}
+
 - (RACSignal<RACTuple *> *)executeSignal
 {
     YKNetworkRequest *request = [self.request copy];
@@ -480,7 +505,7 @@
     }
     YKNetworkRequest *requestCopy = [request copy];
     
-    [self configWithRequest:requestCopy];
+//    [self configWithRequest:requestCopy];
     
     YKNetworkingConfig *config = [YKNetworkingConfig defaultConfig];
     
@@ -515,27 +540,7 @@
     return YES;
 }
 
-- (void)configWithRequest:(YKNetworkRequest *)request
-{
-    AFHTTPRequestSerializer *requestSerializer = [AFHTTPRequestSerializer serializer];
-    
-    double timeoutInterval = [YKNetworkingConfig defaultConfig].timeoutInterval;
-    if (timeoutInterval != 0) {
-        requestSerializer.timeoutInterval = timeoutInterval;
-    }else
-    {
-        requestSerializer.timeoutInterval = 60;
-    }
-    self.manager.requestSerializer = requestSerializer;
-    // 直接支持多种格式的返回
-    self.manager.responseSerializer = [AFCompoundResponseSerializer compoundSerializerWithResponseSerializers:@[
-        [AFJSONResponseSerializer serializer],
-        [AFImageResponseSerializer serializer],
-        [AFHTTPResponseSerializer serializer],
-        [AFPropertyListResponseSerializer serializer],
-        [AFXMLParserResponseSerializer serializer]
-    ]];
-}
+
 
 - (void)cancelAllRequest
 {

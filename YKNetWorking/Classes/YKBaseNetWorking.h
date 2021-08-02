@@ -14,16 +14,19 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface YKBaseNetWorking : NSObject
 
-
-
 typedef void(^complateBlockType)( id _Nullable responData ,NSError * _Nullable error);
 
 typedef void(^progressBlockType)(float progress);
 
-+ (NSURLSessionDataTask *)executeTaskWith:(YKNetworkRequest *)request;
++ (NSURLSessionDataTask *)executeTaskWith:(YKNetworkRequest *)request
+                            complateBlock:(complateBlockType)complate;
+
++ (NSURLSessionDownloadTask *)uploadTaskWith:(YKNetworkRequest *)request
+                            downloadProgress:(progressBlockType)downloadProgress
+                               complateBlock:(complateBlockType)complate;
 
 + (NSURLSessionDownloadTask *)downloadTaskWith:(YKNetworkRequest *)request
-                              downloadProgress:(void (^)(float progress))downloadProgress
+                              downloadProgress:(progressBlockType)downloadProgress
                                  complateBlock:(complateBlockType)complate;
 @end
 

@@ -8,14 +8,8 @@
 
 #import <Foundation/Foundation.h>
 #import <AFNetworking/AFNetworking.h>
+#import "YKNetWorkingConst.h"
 
-typedef NS_ENUM(NSInteger, YKNetworkRequestMethod) {
-    YKNetworkRequestMethodGET                  = 0,
-    YKNetworkRequestMethodPOST,
-    YKNetworkRequestMethodPUT,
-    YKNetworkRequestMethodPATCH,
-    YKNetworkRequestMethodDELETE,
-};
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -35,6 +29,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 /** 请求方式 */
 @property (nonatomic, assign) YKNetworkRequestMethod       method;
+
+/** 请求体类型 默认二进制形式 */
+@property (nonatomic, assign) YKNetworkRequestParamsType   paramsType;
 
 /** 获取当前的请求方式(字符串) ***/
 @property (nonatomic, copy, readonly)      NSString       *methodStr;
@@ -72,10 +69,13 @@ NS_ASSUME_NONNULL_BEGIN
 /** 假数据 */
 @property (nonatomic, strong) id<NSCopying> mockData;
 
-#pragma mark -----------❌unUse❌(后续拓展才会真正使用到，敬请期待)------------
-
 /** 处理AF请求体: 特殊情况下需要修改时使用 一般可以不用 */
 @property (nonatomic, copy) AFHTTPRequestSerializer *(^requestSerializerBlock)(AFHTTPRequestSerializer *);
+
+/** 处理AF响应体: 特殊情况下需要修改时使用 一般可以不用 */
+@property (nonatomic, copy) AFHTTPResponseSerializer *(^responseSerializerBlock)(AFHTTPResponseSerializer *);
+
+#pragma mark -----------❌unUse❌(后续拓展才会真正使用到，敬请期待)------------
 
 
 /** SSL证书 */

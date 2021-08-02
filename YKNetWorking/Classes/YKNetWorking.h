@@ -14,23 +14,8 @@
 #import "YKBaseNetWorking.h"
 #import "RACSignal+networking.h"
 #import "YKBlockTrampoline.h"
+#import "YKNetWorkingConst.h"
 
-#define get(urlStr) url(urlStr).method(YKNetworkRequestMethodGET)
-#define post(urlStr) url(urlStr).method(YKNetworkRequestMethodPOST)
-#define put(urlStr) url(urlStr).method(YKNetworkRequestMethodPUT)
-#define patch(urlStr) url(urlStr).method(YKNetworkRequestMethodPATCH)
-#define delete(urlStr) url(urlStr).method(YKNetworkRequestMethodDELETE)
-
-#define GET(urlStr,...)       url(urlStr).method(YKNetworkRequestMethodGET).params(NSDictionaryOfVariableBindings(__VA_ARGS__))
-#define POST(urlStr,...)      url(urlStr).method(YKNetworkRequestMethodPOST).params(NSDictionaryOfVariableBindings(__VA_ARGS__))
-#define PUT(urlStr,...)       url(urlStr).method(YKNetworkRequestMethodPUT).params(NSDictionaryOfVariableBindings(__VA_ARGS__))
-#define DELETE(urlStr,...)    url(urlStr).method(YKNetworkRequestMethodPATCH).params(NSDictionaryOfVariableBindings(__VA_ARGS__))
-#define PATCH(urlStr,...)     url(urlStr).method(YKNetworkRequestMethodDELETE).params(NSDictionaryOfVariableBindings(__VA_ARGS__))
-
-#define kNoCacheErrorCode -10992
-
-/// 监听网络状态的通知
-#define kYKNetworking_NetworkStatus @"kYKNetworking_NetworkStatus"
 
 
 //static NSString *kYKNetworking_NetworkStatus = @"kYKNetworking_NetworkStatus";
@@ -130,10 +115,23 @@ NS_ASSUME_NONNULL_BEGIN
 /// 虚拟回调 设置虚拟回调则原本的请求则不会进行请求直接返回虚拟内容
 - (YKNetWorking *(^)(id mockData))mockData;
 
+/** 请求体类型 默认二进制形式 */
+- (YKNetWorking * (^)(YKNetworkRequestParamsType paramsType))paramsType;
+
 /// 取消当前所有请求
 - (void)cancelAllRequest;
 
 - (void)cancelRequestWithName:(NSString *)name;
+
+/**
+ 处理AF请求体,普通情况下无需调用,有特殊需求时才需要拦截AF的请求体进行修改
+ */
+- (void)handleRequestSerialization:(AFHTTPRequestSerializer *(^)(AFHTTPRequestSerializer *serializer))requestSerializerBlock;
+
+/**
+ 处理AF响应体,普通情况下无需调用,有特殊需求时才需要拦截AF的响应体进行修改
+ */
+- (void)handleResponseSerialization:(AFHTTPResponseSerializer *(^)(AFHTTPResponseSerializer *serializer))responseSerializerBlock;
 
 #pragma mark ----------------------🔽🔽🔽🔽在mvvm模型下使用信号量相对稳妥-----------------------------
 /**
