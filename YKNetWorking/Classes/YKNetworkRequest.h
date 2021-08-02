@@ -69,6 +69,10 @@ NS_ASSUME_NONNULL_BEGIN
 /** 假数据 */
 @property (nonatomic, strong) id<NSCopying> mockData;
 
+/** 请求上传文件的字段名 */
+@property (nonatomic, copy) NSString *fileFieldName;
+
+
 /** 处理AF请求体: 特殊情况下需要修改时使用 一般可以不用 */
 @property (nonatomic, copy) AFHTTPRequestSerializer *(^requestSerializerBlock)(AFHTTPRequestSerializer *);
 
@@ -83,10 +87,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 /** 文件名 */
 @property (nonatomic, strong) NSMutableArray<NSString *> *fileName;
-
-/** 请求上传文件的字段名 */
-@property (nonatomic, copy) NSString *fileFieldName;
-
 /** 上传的数据 */
 @property (nonatomic, strong) NSMutableArray<NSData *> *data;
 

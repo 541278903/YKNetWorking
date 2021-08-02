@@ -118,6 +118,9 @@ NS_ASSUME_NONNULL_BEGIN
 /** 请求体类型 默认二进制形式 */
 - (YKNetWorking * (^)(YKNetworkRequestParamsType paramsType))paramsType;
 
+/// 上传二进制的内容
+- (YKNetWorking *(^)(NSString *fileField))fileFieldName;
+
 /// 取消当前所有请求
 - (void)cancelAllRequest;
 

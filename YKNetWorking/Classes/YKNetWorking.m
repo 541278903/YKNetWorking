@@ -234,6 +234,14 @@
     };
 }
 
+- (YKNetWorking *(^)(NSString *fileField))fileFieldName
+{
+    return ^YKNetWorking *(NSString *fileField) {
+        self.request.fileFieldName = fileField;
+        return self;
+    };
+}
+
 - (void)handleRequestSerialization:(AFHTTPRequestSerializer *(^)(AFHTTPRequestSerializer *serializer))requestSerializerBlock
 {
     if (requestSerializerBlock) {
