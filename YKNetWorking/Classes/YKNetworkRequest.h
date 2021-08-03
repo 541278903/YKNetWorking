@@ -79,6 +79,12 @@ NS_ASSUME_NONNULL_BEGIN
 /** 处理AF响应体: 特殊情况下需要修改时使用 一般可以不用 */
 @property (nonatomic, copy) AFHTTPResponseSerializer *(^responseSerializerBlock)(AFHTTPResponseSerializer *);
 
+/** 请求Task 当启用假数据返回的时候为空 */
+@property (nonatomic, strong) NSURLSessionDataTask        *task;
+
+/** 下载Task */
+@property (nonatomic, strong) NSURLSessionDownloadTask    *downloadTask;
+
 #pragma mark -----------❌unUse❌(后续拓展才会真正使用到，敬请期待)------------
 
 
@@ -98,12 +104,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 /** 忽略最短请求间隔 强制发出请求 */
 @property (nonatomic, assign, getter=isForce) BOOL force;
-
-/** 请求Task 当启用假数据返回的时候为空 */
-@property (nonatomic, strong) NSURLSessionDataTask        *task;
-
-/** 下载Task */
-@property (nonatomic, strong) NSURLSessionDownloadTask    *downloadTask;
 
 /** 自定义属性 */
 @property (nonatomic, strong) NSMutableDictionary<NSString *,id<NSCopying>> *customProperty;

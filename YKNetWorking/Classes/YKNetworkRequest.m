@@ -7,16 +7,18 @@
 //
 
 #import "YKNetworkRequest.h"
-#import <MJExtension/MJExtension.h>
+//#import <MJExtension/MJExtension.h>
 
 @implementation YKNetworkRequest
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     YKNetworkRequest *request = [[YKNetworkRequest allocWithZone:zone] init];
+    request.name = self.name;
     request.urlStr = self.urlStr;
     request.params = self.params;
     request.header = self.header;
     request.method = self.method;
+    request.paramsType = self.paramsType;
     request.disableDynamicParams = self.disableDynamicParams;
     request.disableDynamicHeader = self.disableDynamicHeader;
     request.disableHandleResponse = self.disableHandleResponse;
@@ -27,6 +29,10 @@
     request.uploadName = self.uploadName;
     request.uploadMimeType = self.uploadMimeType;
     request.startTimeInterval = self.startTimeInterval;
+    request.mockData = self.mockData;
+    request.fileFieldName = self.fileFieldName;
+    request.requestSerializerBlock = self.requestSerializerBlock;
+    request.responseSerializerBlock = self.responseSerializerBlock;
     request.task = self.task;
     request.downloadTask = self.downloadTask;
     return request;

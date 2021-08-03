@@ -56,4 +56,18 @@
         }];
     };
 }
+- (RACSignal *(^)(NSString *))mapWithSomething
+{
+    return ^RACSignal *(NSString *someThing) {
+        return [self map:^id(RACTuple *tuple) {
+            YKNetworkResponse *resp = tuple.second;
+            id data = resp.rawData[someThing];
+            if ([data isKindOfClass:NSNull.class]) {
+                return nil;
+            } else {
+                return data;
+            }
+        }];
+    };
+}
 @end

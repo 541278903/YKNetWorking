@@ -12,10 +12,22 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface RACSignal (networking)
-//获取成功回调的信息
+/**
+ 把RawData映射出来
+
+ @return 信号
+ */
 - (RACSignal *)mapWithRawData;
 
+/**
+ 映射出RawData中的某个键中的值并转成模型
+ */
 - (RACSignal *(^)(NSString *someThing,Class clazz))mapArrayWithSomething;
+
+/**
+ 映射出RawData中的某个键中的值 必须是rawdata为字典
+ */
+- (RACSignal *(^)(NSString *))mapWithSomething;
 
 @end
 

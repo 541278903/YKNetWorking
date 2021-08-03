@@ -102,30 +102,49 @@
                                  success:(successBlockType)success
                                  failure:(failureBlockType)failure
 {
-    [YKBaseNetWorking configWithRequest:request];
+    NSURLSessionDataTask *task = nil;
     
-    NSURLSessionDataTask *task = [[AFHTTPSessionManager manager] POST:request.urlStr parameters:request.params headers:nil constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
-        if (request.uploadFileData) {
-            [formData appendPartWithFileData:request.uploadFileData name:request.fileFieldName fileName:request.uploadName mimeType:request.uploadMimeType];
-        }
-    } progress:^(NSProgress * _Nonnull uploadProgress) {
-        if (uploadProgressBlock) {
-            uploadProgressBlock((float)uploadProgress.completedUnitCount / (float)uploadProgress.totalUnitCount);
-        }
-    } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-        if (success) {
-            YKNetworkResponse *response = [[YKNetworkResponse alloc] init];
-            response.isCache = NO;
-            response.rawData = responseObject;
-            success(response,request);
-        }
-    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+    if (request && request.uploadFileData&& request.uploadName&&request.uploadMimeType) {
+        
+        [YKBaseNetWorking configWithRequest:request];
+        
+        task = [[AFHTTPSessionManager manager] POST:request.urlStr parameters:request.params headers:nil constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+            if (request.uploadFileData) {
+                [formData appendPartWithFileData:request.uploadFileData name:request.fileFieldName fileName:request.uploadName mimeType:request.uploadMimeType];
+            }
+        } progress:^(NSProgress * _Nonnull uploadProgress) {
+            if (uploadProgressBlock) {
+                uploadProgressBlock((float)uploadProgress.completedUnitCount / (float)uploadProgress.totalUnitCount);
+            }
+        } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+            if (success) {
+                YKNetworkResponse *response = [[YKNetworkResponse alloc] init];
+                response.isCache = NO;
+                response.rawData = responseObject;
+                success(response,request);
+            }
+        } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+            if (failure) {
+                failure(request,NO,nil,error);
+            }
+        }];
+    }else{
         if (failure) {
-            failure(request,NO,nil,error);
+            NSString *errormessage = @"没有上传文件或上传名称或上传mimtype";
+            NSError *err = [NSError errorWithDomain:@"NSCommonErrorDomain" code:-100 userInfo:@{
+                NSLocalizedDescriptionKey:errormessage,
+                NSLocalizedFailureReasonErrorKey:errormessage,
+                }];
+            YKNetworkResponse *response = [[YKNetworkResponse alloc]init];
+            response.rawData = errormessage;
+            failure(request,NO,errormessage,err);
         }
-    }];
+    }
     
     request.task = task;
+    
+    [task resume];
+    
     return task;
 }
 

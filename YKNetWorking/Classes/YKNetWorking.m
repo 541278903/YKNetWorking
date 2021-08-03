@@ -270,67 +270,40 @@
     __weak typeof(self) weakSelf = self;
     RACSignal *singal = [RACSignal createSignal:^RACDisposable * _Nullable(id<RACSubscriber>  _Nonnull subscriber) {
         __strong typeof(weakSelf) strongself = weakSelf;
-//        request.task = [[AFHTTPSessionManager manager] dataTaskWithHTTPMethod:request.methodStr URLString:request.urlStr parameters:request.params headers:request.header uploadProgress:^(NSProgress * _Nonnull uploadProgress) {
-//
-//        } downloadProgress:^(NSProgress * _Nonnull downloadProgress) {
-//            if(request.progressBlock)
-//            {
-//                request.progressBlock(downloadProgress.fractionCompleted);
-//            }
-//        } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-//            YKNetworkResponse *response = [[YKNetworkResponse alloc]init];
-//            response.rawData = responseObject;
-//            if(strongself.handleResponse && !request.disableHandleResponse)
-//            {
-//                NSError *error = strongself.handleResponse(response,request);
-//                if (error) {
-//                    [subscriber sendError:error];
-//                    [strongself saveTask:request response:response isException:YES];
-//                }else
-//                {
-//                    [subscriber sendNext:RACTuplePack(request,response)];
-//                    [strongself saveTask:request response:response isException:NO];
-//                }
-//            }else
-//            {
-//                [subscriber sendNext:RACTuplePack(request,response)];
-//                [strongself saveTask:request response:response isException:NO];
-//            }
-//            [subscriber sendCompleted];
-//        } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-//            [subscriber sendError:error];
-//            YKNetworkResponse *response = [[YKNetworkResponse alloc]init];
-//            response.rawData = error.localizedDescription;
-//            [strongself saveTask:request response:response isException:YES];
-//            [subscriber sendCompleted];
-//        }];
-//        [request.task resume];
         [YKBaseNetWorking requestWithRequest:request progressBlock:^(float progress) {
             if (request.progressBlock) {
                 request.progressBlock(progress);
             }
-        } successBlock:^(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request) {
+        } successBlock:^(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request) {\
+            NSError *error = nil;
             if(strongself.handleResponse && !request.disableHandleResponse)
             {
-                NSError *error = strongself.handleResponse(response,request);
+                error = strongself.handleResponse(response,request);
                 if (!error) {
                     [subscriber sendNext:RACTuplePack(request,response)];
                 }else{
                     [subscriber sendError:error];
                 }
-                [self saveTask:request response:response isException:(error != nil)];
             }else{
                 [subscriber sendNext:RACTuplePack(request,response)];
-                [self saveTask:reques response:<#(YKNetworkResponse *)#> isException:<#(BOOL)#>]
             }
+            [self saveTask:request response:response isException:(error != nil)];
             [subscriber sendCompleted];
         } failureBlock:^(YKNetworkRequest * _Nonnull request, BOOL isCache, id  _Nullable responseObject, NSError * _Nonnull error) {
             YKNetworkResponse *response = [[YKNetworkResponse alloc] init];
             if ([self handleError:request response:response isCache:isCache error:error]) {
-                if (<#condition#>) {
-                    <#statements#>
+                if (self.handleResponse && responseObject) {
+                    response.rawData = responseObject;
+                    NSError *error = self.handleResponse(response,request);
+                    if (error) {
+                        [subscriber sendError:error];
+                    }
+                }else{
+                    [subscriber sendError:error];
                 }
             }
+            [self saveTask:request response:response isException:YES];
+            [subscriber sendCompleted];
         }];
         strongself.request = nil;
         
@@ -352,60 +325,46 @@
         self.request = nil;
         return [RACSignal empty];
     }
+    
+    
+    
     __weak typeof(self) weakSelf = self;
     RACSignal *singal = [RACSignal createSignal:^RACDisposable * _Nullable(id<RACSubscriber>  _Nonnull subscriber) {
         __strong typeof(weakSelf) strongself = weakSelf;
-        if (request && request.uploadFileData&& request.uploadName&&request.uploadMimeType) {
-            request.task = [[AFHTTPSessionManager manager] POST:request.urlStr parameters:request.params headers:request.header constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
-                [formData appendPartWithFileData:request.uploadFileData
-                                            name:@"file"
-                                        fileName:request.uploadName
-                                        mimeType:request.uploadMimeType];
-            } progress:^(NSProgress * _Nonnull uploadProgress) {
-                if (request.progressBlock) {
-                    request.progressBlock((float)uploadProgress.completedUnitCount / (float)uploadProgress.totalUnitCount);
+        request.task = [YKBaseNetWorking uploadTaskWith:request uploadProgressBlock:^(float progress) {
+            if (request.progressBlock) {
+                request.progressBlock(progress);
+            }
+        } success:^(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request) {
+            NSError *error = nil;
+            if (strongself.handleResponse && !request.disableHandleResponse) {
+                error = strongself.handleResponse(response,request);
+                if (error) {
+                    [subscriber sendError:error];
+                }else{
+                    [subscriber sendNext:RACTuplePack(request,response)];
                 }
-            } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-                YKNetworkResponse *response = [[YKNetworkResponse alloc]init];
-                response.rawData = responseObject;
-                if(strongself.handleResponse && !request.disableHandleResponse)
-                {
-                    NSError *error = strongself.handleResponse(response,request);
+            }else{
+                [subscriber sendNext:RACTuplePack(request,response)];
+            }
+            [strongself saveTask:request response:response isException:(error != nil)];
+            [subscriber sendCompleted];
+        } failure:^(YKNetworkRequest * _Nonnull request, BOOL isCache, id  _Nullable responseObject, NSError * _Nonnull error) {
+            YKNetworkResponse *response = [[YKNetworkResponse alloc] init];
+            if ([self handleError:request response:response isCache:isCache error:error]) {
+                if (self.handleResponse && responseObject) {
+                    response.rawData = responseObject;
+                    NSError *error = self.handleResponse(response,request);
                     if (error) {
                         [subscriber sendError:error];
-                        [strongself saveTask:request response:response isException:YES];
-                    }else
-                    {
-                        [subscriber sendNext:RACTuplePack(request,response)];
-                        [strongself saveTask:request response:response isException:NO];
                     }
-                }else
-                {
-                    [subscriber sendNext:RACTuplePack(request,response)];
-                    [strongself saveTask:request response:response isException:NO];
-                }
-                [subscriber sendCompleted];
-            } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+                }else{
                     [subscriber sendError:error];
-                
-                YKNetworkResponse *response = [[YKNetworkResponse alloc]init];
-                response.rawData = error.localizedDescription;
-                [strongself saveTask:request response:response isException:YES];
-                    [subscriber sendCompleted];
-            }];
-            [request.task resume];
-        }else
-        {
-            NSError *err = [NSError errorWithDomain:@"NSCommonErrorDomain" code:-100 userInfo:@{
-                NSLocalizedDescriptionKey:@"没有上传文件或上传名称或上传mimtype",
-                NSLocalizedFailureReasonErrorKey:@"没有上传文件或上传名称或上传mimtype",
-                }];
-            [subscriber sendError:err];
-            YKNetworkResponse *response = [[YKNetworkResponse alloc]init];
-            response.rawData = err.localizedDescription;
-            [strongself saveTask:request response:response isException:YES];
+                }
+            }
+            [self saveTask:request response:response isException:YES];
             [subscriber sendCompleted];
-        }
+        }];
         
         strongself.request = nil;
         return nil;
@@ -430,56 +389,43 @@
     __weak typeof(self) weakSelf = self;
     RACSignal *singal = [RACSignal createSignal:^RACDisposable * _Nullable(id<RACSubscriber>  _Nonnull subscriber) {
         __strong typeof(weakSelf) strongself = weakSelf;
-
-        NSURL *downloadURL = [NSURL URLWithString:request.urlStr];
-
-        NSURLRequest *downloadRequest = [NSURLRequest requestWithURL:downloadURL];
-        request.downloadTask = [[AFHTTPSessionManager manager] downloadTaskWithRequest:downloadRequest progress:^(NSProgress * _Nonnull downloadProgress) {
+        
+        [YKBaseNetWorking downloadTaskWith:request downloadProgressBlock:^(float progress) {
             if (request.progressBlock) {
-                request.progressBlock((float)downloadProgress.completedUnitCount / (float)downloadProgress.totalUnitCount);
+                request.progressBlock(progress);
             }
-        } destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
-            NSString *downloadPath = request.destPath;
-            NSFileManager *fileManager = [NSFileManager defaultManager];
-            NSString *filePath = @"";
-            BOOL isDir = NO;
-            if (isDir) {
-                filePath = [downloadPath stringByAppendingPathComponent:response.suggestedFilename];
-            }else
-            {
-                filePath = downloadPath;
-            }
-            NSRange range = [filePath rangeOfString:@"/" options:NSBackwardsSearch];
-            NSString *depath = [filePath stringByReplacingCharactersInRange:NSMakeRange(range.location, filePath.length - range.location) withString:@""];
-            [fileManager createDirectoryAtPath:depath withIntermediateDirectories:YES attributes:nil error:nil];
-            return [NSURL fileURLWithPath:filePath];
-        } completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
-            YKNetworkResponse *responsed = [[YKNetworkResponse alloc]init];
-            responsed.rawData = @{@"path": filePath.relativePath ?: @"", @"code":@200};
-            if (!error) {
-                if(strongself.handleResponse && !request.disableHandleResponse)
-                {
-                    NSError *errord = strongself.handleResponse(responsed,request);
-                    if (errord) {
-                        [subscriber sendError:errord];
-                        [strongself saveTask:request response:responsed isException:YES];
-                    }else
-                    {
-                        [subscriber sendNext:RACTuplePack(request,responsed)];
-                        [strongself saveTask:request response:responsed isException:NO];
-                    }
-                }else
-                {
-                    [subscriber sendNext:RACTuplePack(request,responsed)];
-                    [strongself saveTask:request response:responsed isException:NO];
+        } success:^(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request) {
+            NSError *error = nil;
+            if (strongself.handleResponse && !request.disableHandleResponse) {
+                error = strongself.handleResponse(response,request);
+                if (error) {
+                    [subscriber sendError:error];
+                }else{
+                    [subscriber sendNext:RACTuplePack(request,response)];
                 }
-            }else
-            {
-                [subscriber sendError:error];
+                [strongself saveTask:request response:response isException:(error != nil)];
+                [subscriber sendCompleted];
+            }else{
+                
             }
+        } failure:^(YKNetworkRequest * _Nonnull request, BOOL isCache, id  _Nullable responseObject, NSError * _Nonnull error) {
+            YKNetworkResponse *response = [[YKNetworkResponse alloc] init];
+            if ([self handleError:request response:response isCache:isCache error:error]) {
+                if (self.handleResponse && responseObject) {
+                    response.rawData = responseObject;
+                    NSError *error = self.handleResponse(response,request);
+                    if (error) {
+                        [subscriber sendError:error];
+                    }
+                }else{
+                    [subscriber sendError:error];
+                }
+            }
+            [self saveTask:request response:response isException:YES];
             [subscriber sendCompleted];
         }];
-        [request.downloadTask resume];
+        
+        
         strongself.request = nil;
         return nil;
     }];
@@ -575,7 +521,7 @@
     return YES;
 }
 
-- (BOOL)handleError:(MMCNetworkRequest *)request response:(MMCNetworkResponse *)response isCache:(BOOL)isCache error:(NSError *)error
+- (BOOL)handleError:(YKNetworkRequest *)request response:(YKNetworkResponse *)response isCache:(BOOL)isCache error:(NSError *)error
 {
     
     //MARK:发生错误时对错误进行处理
@@ -633,7 +579,7 @@
 {
 #ifdef DEBUG
     //
-    NSLog(@"📢dealloc:YKNetWorking");
+    NSLog(@"📶dealloc:YKNetWorking");
 #endif
 }
 
