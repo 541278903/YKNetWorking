@@ -180,7 +180,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (RACSignal *)downloadDataRowDataSignal;
 
 
-#pragma mark -----------非响应式变成可用以下调用常规方法------------
+#pragma mark -----------非响应式编程可用以下调用常规方法------------
 
 /// 网络请求
 /// @param method 请求方式
