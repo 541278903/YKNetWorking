@@ -270,41 +270,68 @@
     __weak typeof(self) weakSelf = self;
     RACSignal *singal = [RACSignal createSignal:^RACDisposable * _Nullable(id<RACSubscriber>  _Nonnull subscriber) {
         __strong typeof(weakSelf) strongself = weakSelf;
-        request.task = [[AFHTTPSessionManager manager] dataTaskWithHTTPMethod:request.methodStr URLString:request.urlStr parameters:request.params headers:request.header uploadProgress:^(NSProgress * _Nonnull uploadProgress) {
-            
-        } downloadProgress:^(NSProgress * _Nonnull downloadProgress) {
-            if(request.progressBlock)
-            {
-                request.progressBlock(downloadProgress.fractionCompleted);
+//        request.task = [[AFHTTPSessionManager manager] dataTaskWithHTTPMethod:request.methodStr URLString:request.urlStr parameters:request.params headers:request.header uploadProgress:^(NSProgress * _Nonnull uploadProgress) {
+//
+//        } downloadProgress:^(NSProgress * _Nonnull downloadProgress) {
+//            if(request.progressBlock)
+//            {
+//                request.progressBlock(downloadProgress.fractionCompleted);
+//            }
+//        } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+//            YKNetworkResponse *response = [[YKNetworkResponse alloc]init];
+//            response.rawData = responseObject;
+//            if(strongself.handleResponse && !request.disableHandleResponse)
+//            {
+//                NSError *error = strongself.handleResponse(response,request);
+//                if (error) {
+//                    [subscriber sendError:error];
+//                    [strongself saveTask:request response:response isException:YES];
+//                }else
+//                {
+//                    [subscriber sendNext:RACTuplePack(request,response)];
+//                    [strongself saveTask:request response:response isException:NO];
+//                }
+//            }else
+//            {
+//                [subscriber sendNext:RACTuplePack(request,response)];
+//                [strongself saveTask:request response:response isException:NO];
+//            }
+//            [subscriber sendCompleted];
+//        } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+//            [subscriber sendError:error];
+//            YKNetworkResponse *response = [[YKNetworkResponse alloc]init];
+//            response.rawData = error.localizedDescription;
+//            [strongself saveTask:request response:response isException:YES];
+//            [subscriber sendCompleted];
+//        }];
+//        [request.task resume];
+        [YKBaseNetWorking requestWithRequest:request progressBlock:^(float progress) {
+            if (request.progressBlock) {
+                request.progressBlock(progress);
             }
-        } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-            YKNetworkResponse *response = [[YKNetworkResponse alloc]init];
-            response.rawData = responseObject;
+        } successBlock:^(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request) {
             if(strongself.handleResponse && !request.disableHandleResponse)
             {
                 NSError *error = strongself.handleResponse(response,request);
-                if (error) {
-                    [subscriber sendError:error];
-                    [strongself saveTask:request response:response isException:YES];
-                }else
-                {
+                if (!error) {
                     [subscriber sendNext:RACTuplePack(request,response)];
-                    [strongself saveTask:request response:response isException:NO];
+                }else{
+                    [subscriber sendError:error];
                 }
-            }else
-            {
+                [self saveTask:request response:response isException:(error != nil)];
+            }else{
                 [subscriber sendNext:RACTuplePack(request,response)];
-                [strongself saveTask:request response:response isException:NO];
+                [self saveTask:reques response:<#(YKNetworkResponse *)#> isException:<#(BOOL)#>]
             }
             [subscriber sendCompleted];
-        } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-            [subscriber sendError:error];
-            YKNetworkResponse *response = [[YKNetworkResponse alloc]init];
-            response.rawData = error.localizedDescription;
-            [strongself saveTask:request response:response isException:YES];
-            [subscriber sendCompleted];
+        } failureBlock:^(YKNetworkRequest * _Nonnull request, BOOL isCache, id  _Nullable responseObject, NSError * _Nonnull error) {
+            YKNetworkResponse *response = [[YKNetworkResponse alloc] init];
+            if ([self handleError:request response:response isCache:isCache error:error]) {
+                if (<#condition#>) {
+                    <#statements#>
+                }
+            }
         }];
-        [request.task resume];
         strongself.request = nil;
         
         return nil;
@@ -548,6 +575,13 @@
     return YES;
 }
 
+- (BOOL)handleError:(MMCNetworkRequest *)request response:(MMCNetworkResponse *)response isCache:(BOOL)isCache error:(NSError *)error
+{
+    
+    //MARK:发生错误时对错误进行处理
+    
+    return YES;
+}
 
 
 - (void)cancelAllRequest

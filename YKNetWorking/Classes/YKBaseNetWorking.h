@@ -23,16 +23,18 @@ typedef void(^successBlockType)(YKNetworkResponse *response, YKNetworkRequest *r
 typedef void(^failureBlockType)(YKNetworkRequest *request, BOOL isCache, id _Nullable responseObject, NSError *error);
 
 
++ (NSURLSessionTask *)requestWithRequest:(YKNetworkRequest *)request
+                           progressBlock:(progressBlockType)progressBlock
+                            successBlock:(successBlockType)successBlock
+                            failureBlock:(failureBlockType)failureBlock;
 
-+ (NSURLSessionDataTask *)executeTaskWith:(YKNetworkRequest *)request
-                                  success:(_Nullable successBlockType)success
-                                  failure:(_Nullable failureBlockType)failure;
-
+//执行上传内容
 + (NSURLSessionDataTask *)uploadTaskWith:(YKNetworkRequest *)request
                      uploadProgressBlock:(_Nullable progressBlockType)uploadProgressBlock
                                  success:(_Nullable successBlockType)success
                                  failure:(_Nullable failureBlockType)failure;
 
+//执行下载内容
 + (NSURLSessionDownloadTask *)downloadTaskWith:(YKNetworkRequest *)request
                          downloadProgressBlock:(_Nullable progressBlockType)downloadProgressBlock
                                        success:(_Nullable successBlockType)success

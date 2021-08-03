@@ -15,9 +15,35 @@
 
 @implementation YKBaseNetWorking
 
++ (NSURLSessionTask *)requestWithRequest:(YKNetworkRequest *)request progressBlock:(progressBlockType)progressBlock successBlock:(successBlockType)successBlock failureBlock:(failureBlockType)failureBlock
+{
+    __block NSURLSessionDataTask *dataTask = nil;
+    
+    if (request.mockData != nil) {
+        if (successBlock) {
+            YKNetworkResponse *resp = [[YKNetworkResponse alloc] init];
+            resp.isCache = NO;
+            resp.rawData = request.mockData;
+            successBlock(resp,request);
+            return nil;
+        }
+    }
+    
+//    dataTask = [self executeTaskWith:request success:successBlock failure:failureBlock];
+    dataTask = [self executeTaskWith:request progress:progressBlock success:successBlock failure:failureBlock];
+    
+    
+    request.task = dataTask;
+    return dataTask;
+    
+}
+
 
 #pragma mark ============ 执行请求内容 ==========
-+ (NSURLSessionDataTask *)executeTaskWith:(YKNetworkRequest *)request success:(_Nullable successBlockType)success failure:(_Nullable failureBlockType)failure
++ (NSURLSessionDataTask *)executeTaskWith:(YKNetworkRequest *)request
+                                 progress:(_Nullable progressBlockType)progress
+                                  success:(_Nullable successBlockType)success
+                                  failure:(_Nullable failureBlockType)failure
 {
     
     [YKBaseNetWorking configWithRequest:request];
@@ -33,7 +59,13 @@
     
     __block NSURLSessionDataTask *dataTask = nil;
     
-    dataTask = [[AFHTTPSessionManager manager] dataTaskWithRequest:req uploadProgress:nil downloadProgress:nil completionHandler:^(NSURLResponse * _Nonnull response, id  _Nullable responseObject, NSError * _Nullable error) {
+    dataTask = [[AFHTTPSessionManager manager] dataTaskWithRequest:req uploadProgress:^(NSProgress * _Nonnull uploadProgress) {
+        
+    } downloadProgress:^(NSProgress * _Nonnull downloadProgress) {
+        if (progress) {
+            progress((float)downloadProgress.completedUnitCount / (float)downloadProgress.totalUnitCount);
+        }
+    } completionHandler:^(NSURLResponse * _Nonnull response, id  _Nullable responseObject, NSError * _Nullable error) {
         if (!error) {
             if ([response isKindOfClass:NSHTTPURLResponse.class]) {
                 
@@ -55,6 +87,7 @@
                 success(resp,request);
             }
         }
+        
     }];
     [dataTask resume];
     
