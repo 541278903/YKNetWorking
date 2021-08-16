@@ -291,10 +291,10 @@
             [subscriber sendCompleted];
         } failureBlock:^(YKNetworkRequest * _Nonnull request, BOOL isCache, id  _Nullable responseObject, NSError * _Nonnull error) {
             YKNetworkResponse *response = [[YKNetworkResponse alloc] init];
-            if ([self handleError:request response:response isCache:isCache error:error]) {
-                if (self.handleResponse && responseObject) {
+            if ([strongself handleError:request response:response isCache:isCache error:error]) {
+                if (strongself.handleResponse && responseObject) {
                     response.rawData = responseObject;
-                    NSError *error = self.handleResponse(response,request);
+                    NSError *error = strongself.handleResponse(response,request);
                     if (error) {
                         [subscriber sendError:error];
                     }
@@ -302,7 +302,7 @@
                     [subscriber sendError:error];
                 }
             }
-            [self saveTask:request response:response isException:YES];
+            [strongself saveTask:request response:response isException:YES];
             [subscriber sendCompleted];
         }];
         strongself.request = nil;
@@ -351,10 +351,10 @@
             [subscriber sendCompleted];
         } failure:^(YKNetworkRequest * _Nonnull request, BOOL isCache, id  _Nullable responseObject, NSError * _Nonnull error) {
             YKNetworkResponse *response = [[YKNetworkResponse alloc] init];
-            if ([self handleError:request response:response isCache:isCache error:error]) {
-                if (self.handleResponse && responseObject) {
+            if ([strongself handleError:request response:response isCache:isCache error:error]) {
+                if (strongself.handleResponse && responseObject) {
                     response.rawData = responseObject;
-                    NSError *error = self.handleResponse(response,request);
+                    NSError *error = strongself.handleResponse(response,request);
                     if (error) {
                         [subscriber sendError:error];
                     }
@@ -362,7 +362,7 @@
                     [subscriber sendError:error];
                 }
             }
-            [self saveTask:request response:response isException:YES];
+            [strongself saveTask:request response:response isException:YES];
             [subscriber sendCompleted];
         }];
         
@@ -410,10 +410,10 @@
             }
         } failure:^(YKNetworkRequest * _Nonnull request, BOOL isCache, id  _Nullable responseObject, NSError * _Nonnull error) {
             YKNetworkResponse *response = [[YKNetworkResponse alloc] init];
-            if ([self handleError:request response:response isCache:isCache error:error]) {
-                if (self.handleResponse && responseObject) {
+            if ([strongself handleError:request response:response isCache:isCache error:error]) {
+                if (strongself.handleResponse && responseObject) {
                     response.rawData = responseObject;
-                    NSError *error = self.handleResponse(response,request);
+                    NSError *error = strongself.handleResponse(response,request);
                     if (error) {
                         [subscriber sendError:error];
                     }
@@ -421,7 +421,7 @@
                     [subscriber sendError:error];
                 }
             }
-            [self saveTask:request response:response isException:YES];
+            [strongself saveTask:request response:response isException:YES];
             [subscriber sendCompleted];
         }];
         
