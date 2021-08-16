@@ -24,6 +24,7 @@
             YKNetworkResponse *resp = [[YKNetworkResponse alloc] init];
             resp.isCache = NO;
             resp.rawData = request.mockData;
+            resp.code = 200;
             successBlock(resp,request);
             return nil;
         }
@@ -84,6 +85,7 @@
                 YKNetworkResponse *resp = [[YKNetworkResponse alloc] init];
                 resp.isCache = NO;
                 resp.rawData = responseObject;
+//                resp.code = response
                 success(resp,request);
             }
         }
@@ -121,6 +123,7 @@
                 YKNetworkResponse *response = [[YKNetworkResponse alloc] init];
                 response.isCache = NO;
                 response.rawData = responseObject;
+                response.code = 200;
                 success(response,request);
             }
         } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
@@ -137,6 +140,7 @@
                 }];
             YKNetworkResponse *response = [[YKNetworkResponse alloc]init];
             response.rawData = errormessage;
+            response.code = -100;
             failure(request,NO,errormessage,err);
         }
     }
@@ -176,6 +180,7 @@
             YKNetworkResponse *response = [[YKNetworkResponse alloc] init];
             response.isCache = NO;
             response.rawData = @{@"path":filePath.relativePath?:@"", @"code":@200};
+            response.code = 200;
             success(response,request);
         }
         if (failure && error) {

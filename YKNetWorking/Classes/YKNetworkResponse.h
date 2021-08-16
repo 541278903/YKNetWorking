@@ -12,4 +12,7 @@
 /** 是否是取缓存的响应 */
 @property (nonatomic, assign) BOOL isCache;
 
+/// 响应码
+@property (nonatomic,assign) int code;
+
 @end
