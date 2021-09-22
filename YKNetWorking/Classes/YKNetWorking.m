@@ -242,6 +242,15 @@
     };
 }
 
+/// 返回内容的格式
+- (YKNetWorking *(^)(YKNetworkResponseType type))responseType
+{
+    return ^YKNetWorking *(YKNetworkResponseType type){
+        self.request.responseType = type;
+        return self;
+    };
+}
+
 - (void)handleRequestSerialization:(AFHTTPRequestSerializer *(^)(AFHTTPRequestSerializer *serializer))requestSerializerBlock
 {
     if (requestSerializerBlock) {

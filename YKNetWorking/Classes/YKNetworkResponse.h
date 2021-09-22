@@ -13,6 +13,6 @@
 @property (nonatomic, assign) BOOL isCache;
 
 /// 响应码
-@property (nonatomic,assign) int code;
+@property (nonatomic,assign) NSInteger code;
 
 @end

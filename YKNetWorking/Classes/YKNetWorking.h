@@ -121,6 +121,9 @@ NS_ASSUME_NONNULL_BEGIN
 /// 上传二进制的内容
 - (YKNetWorking *(^)(NSString *fileField))fileFieldName;
 
+/// 返回内容的格式
+- (YKNetWorking *(^)(YKNetworkResponseType type))responseType;
+
 /// 取消当前所有请求
 - (void)cancelAllRequest;
 

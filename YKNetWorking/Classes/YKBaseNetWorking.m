@@ -7,6 +7,7 @@
 
 #import "YKBaseNetWorking.h"
 #import "YKNetworkingConfig.h"
+#import "YKNetworkResponseSerializer.h"
 #import <AFNetworking/AFNetworking.h>
 
 @interface YKBaseNetWorking ()
@@ -67,12 +68,12 @@
             progress((float)downloadProgress.completedUnitCount / (float)downloadProgress.totalUnitCount);
         }
     } completionHandler:^(NSURLResponse * _Nonnull response, id  _Nullable responseObject, NSError * _Nullable error) {
+        NSInteger code = 200;
         if (!error) {
             if ([response isKindOfClass:NSHTTPURLResponse.class]) {
-                
-                //TODO:对返回的直接处理
-                
-                
+                NSHTTPURLResponse *urlRespons = (NSHTTPURLResponse *)response;
+                code = urlRespons.statusCode;
+                error = [YKNetworkResponseSerializer verifyWithResponseType:request.responseType reponse:(NSHTTPURLResponse *)response reponseObject:responseObject];
             }
         }
         
@@ -85,7 +86,7 @@
                 YKNetworkResponse *resp = [[YKNetworkResponse alloc] init];
                 resp.isCache = NO;
                 resp.rawData = responseObject;
-//                resp.code = response
+                resp.code = code;
                 success(resp,request);
             }
         }

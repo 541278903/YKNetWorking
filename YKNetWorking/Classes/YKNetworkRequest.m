@@ -27,6 +27,7 @@
     request.destPath = self.destPath;
     request.uploadFileData = self.uploadFileData;
     request.uploadName = self.uploadName;
+    request.responseType = self.responseType;
     request.uploadMimeType = self.uploadMimeType;
     request.startTimeInterval = self.startTimeInterval;
     request.mockData = self.mockData;

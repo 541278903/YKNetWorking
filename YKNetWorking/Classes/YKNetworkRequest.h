@@ -33,10 +33,13 @@ NS_ASSUME_NONNULL_BEGIN
 /** 请求体类型 默认二进制形式 */
 @property (nonatomic, assign) YKNetworkRequestParamsType   paramsType;
 
+///
+@property (nonatomic,assign) YKNetworkResponseType responseType;
+
 /** 获取当前的请求方式(字符串) ***/
 @property (nonatomic, copy, readonly)      NSString       *methodStr;
 
-/** 禁止了动态参数 */  //MARK:rewrite
+/** 禁止了动态参数 */
 @property (nonatomic, assign) BOOL disableDynamicParams;
 
 /** 禁止了动态请求头 */
@@ -48,10 +51,10 @@ NS_ASSUME_NONNULL_BEGIN
 /** 上传/下载进度 */
 @property (nonatomic, copy) void(^progressBlock)(float progress);
 
-/** 最短重复请求时间 */   //MARK:rewrite
+/** 最短重复请求时间 */
 @property (nonatomic, assign) float repeatRequestInterval;
 
-/** 下载路径 */   //MARK:rewrite
+/** 下载路径 */
 @property (nonatomic, copy) NSString *destPath;
 
 /// 上传文件的二进制
