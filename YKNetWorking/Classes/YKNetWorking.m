@@ -129,19 +129,35 @@
         _request = [[YKNetworkRequest alloc]init];
         if(!self.ignoreDefaultHeader&&self.defaultHeader)
         {
-            [_request.header setValuesForKeysWithDictionary:self.defaultHeader];//MARK:设置默认请求参数
+            [self.defaultHeader enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+                if (![_request.header.allKeys containsObject:key]) {
+                    [_request.header setValue:obj forKey:key];
+                }
+            }];
         }
         if(!self.ignoreDefaultParams&&self.defaultParams)
         {
-            [_request.params setValuesForKeysWithDictionary:self.defaultParams];//MARK:设置默认请求参数
+            [self.defaultParams enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+                if (![_request.params.allKeys containsObject:key]) {
+                    [_request.params setValue:obj forKey:key];
+                }
+            }];
         }
         if(self.commonHeader)
         {
-            [_request.header setValuesForKeysWithDictionary:self.commonHeader];
+            [self.commonHeader enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+                if (![_request.header.allKeys containsObject:key]) {
+                    [_request.header setValue:obj forKey:key];
+                }
+            }];
         }
         if(self.commonParams)
         {
-            [_request.params setValuesForKeysWithDictionary:self.commonParams];
+            [self.commonParams enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+                if (![_request.params.allKeys containsObject:key]) {
+                    [_request.params setValue:obj forKey:key];
+                }
+            }];
         }
         
         

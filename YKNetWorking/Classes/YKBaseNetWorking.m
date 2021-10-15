@@ -226,7 +226,7 @@
         requestSerializer.timeoutInterval = timeoutInterval;
     }else
     {
-        requestSerializer.timeoutInterval = 60;
+        requestSerializer.timeoutInterval = 30;
     }
     
     //设置请求内容
