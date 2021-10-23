@@ -51,7 +51,8 @@
     [YKBaseNetWorking configWithRequest:request];
     
     NSError *serializationError = nil;
-    NSMutableURLRequest *req = [[AFHTTPSessionManager manager].requestSerializer requestWithMethod:request.methodStr URLString:request.urlStr parameters:request.params error:&serializationError];
+    AFHTTPRequestSerializer *s = [AFHTTPSessionManager manager].requestSerializer;
+    NSMutableURLRequest *req = [s requestWithMethod:request.methodStr URLString:request.urlStr parameters:request.params error:&serializationError];
     
     if (serializationError != nil) {
         if (failure) {
