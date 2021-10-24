@@ -47,11 +47,12 @@
                                   success:(_Nullable successBlockType)success
                                   failure:(_Nullable failureBlockType)failure
 {
+    AFHTTPSessionManager *mgr = [AFHTTPSessionManager manager];
     
-    [YKBaseNetWorking configWithRequest:request];
+    [YKBaseNetWorking configWithRequest:request manager:mgr];
     
     NSError *serializationError = nil;
-    AFHTTPRequestSerializer *s = [AFHTTPSessionManager manager].requestSerializer;
+    AFHTTPRequestSerializer *s = mgr.requestSerializer;
     NSMutableURLRequest *req = [s requestWithMethod:request.methodStr URLString:request.urlStr parameters:request.params error:&serializationError];
     
     if (serializationError != nil) {
@@ -62,7 +63,7 @@
     
     __block NSURLSessionDataTask *dataTask = nil;
     
-    dataTask = [[AFHTTPSessionManager manager] dataTaskWithRequest:req uploadProgress:^(NSProgress * _Nonnull uploadProgress) {
+    dataTask = [mgr dataTaskWithRequest:req uploadProgress:^(NSProgress * _Nonnull uploadProgress) {
         
     } downloadProgress:^(NSProgress * _Nonnull downloadProgress) {
         if (progress) {
@@ -110,9 +111,11 @@
     
     if (request && request.uploadFileData&& request.uploadName&&request.uploadMimeType) {
         
-        [YKBaseNetWorking configWithRequest:request];
+        AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
         
-        task = [[AFHTTPSessionManager manager] POST:request.urlStr parameters:request.params headers:nil constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+        [YKBaseNetWorking configWithRequest:request manager:manager];
+        
+        task = [manager POST:request.urlStr parameters:request.params headers:nil constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
             if (request.uploadFileData) {
                 [formData appendPartWithFileData:request.uploadFileData name:request.fileFieldName fileName:request.uploadName mimeType:request.uploadMimeType];
             }
@@ -161,13 +164,16 @@
                                        success:(successBlockType)success
                                        failure:(failureBlockType)failure
 {
-    [YKBaseNetWorking configWithRequest:request];
+    
+    AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
+    
+    [YKBaseNetWorking configWithRequest:request manager:manager];
     
     NSURL *downloadURL = [NSURL URLWithString:request.urlStr];
     
     NSURLRequest *downloadRequest = [NSURLRequest requestWithURL:downloadURL];
     
-    NSURLSessionDownloadTask *task = [[AFHTTPSessionManager manager] downloadTaskWithRequest:downloadRequest progress:^(NSProgress * _Nonnull downloadProgress) {
+    NSURLSessionDownloadTask *task = [manager downloadTaskWithRequest:downloadRequest progress:^(NSProgress * _Nonnull downloadProgress) {
         if (downloadProgressBlock) {
             downloadProgressBlock((float)downloadProgress.completedUnitCount / (float)downloadProgress.totalUnitCount);
         }
@@ -205,7 +211,7 @@
 }
 
 #pragma mark ============ 请求头统一处理 ==========
-+ (void)configWithRequest:(YKNetworkRequest *)request
++ (void)configWithRequest:(YKNetworkRequest *)request manager:(AFHTTPSessionManager *)manager
 {
     AFHTTPRequestSerializer *requestSerializer;
     
@@ -232,13 +238,13 @@
     
     //设置请求内容
     if (request.requestSerializerBlock) {
-        [AFHTTPSessionManager manager].requestSerializer = request.requestSerializerBlock(requestSerializer);
+        manager.requestSerializer = request.requestSerializerBlock(requestSerializer);
     }else{
-        [AFHTTPSessionManager manager].requestSerializer = requestSerializer;
+        manager.requestSerializer = requestSerializer;
     }
     
     // 直接支持多种格式的返回
-    [AFHTTPSessionManager manager].responseSerializer = [AFCompoundResponseSerializer compoundSerializerWithResponseSerializers:@[
+    manager.responseSerializer = [AFCompoundResponseSerializer compoundSerializerWithResponseSerializers:@[
         [AFJSONResponseSerializer serializer],
         [AFImageResponseSerializer serializer],
         [AFHTTPResponseSerializer serializer],
