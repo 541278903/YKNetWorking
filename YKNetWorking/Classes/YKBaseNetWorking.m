@@ -71,17 +71,22 @@
         }
     } completionHandler:^(NSURLResponse * _Nonnull response, id  _Nullable responseObject, NSError * _Nullable error) {
         NSInteger code = 200;
-        if (!error) {
-            if ([response isKindOfClass:NSHTTPURLResponse.class]) {
-                NSHTTPURLResponse *urlRespons = (NSHTTPURLResponse *)response;
-                code = urlRespons.statusCode;
-                error = [YKNetworkResponseSerializer verifyWithResponseType:request.responseType reponse:(NSHTTPURLResponse *)response reponseObject:responseObject];
+        
+        NSError *resultError = nil;
+        
+        if ([response isKindOfClass:NSHTTPURLResponse.class]) {
+            NSHTTPURLResponse *urlRespons = (NSHTTPURLResponse *)response;
+            code = urlRespons.statusCode;
+            if (!error) {
+                resultError = [YKNetworkResponseSerializer verifyWithResponseType:request.responseType reponse:(NSHTTPURLResponse *)response reponseObject:responseObject];
+            }else{
+                resultError = [NSError errorWithDomain:@"YKNetworking" code:code userInfo:error.userInfo];
             }
         }
         
-        if (error) {
+        if (resultError) {
             if (failure) {
-                failure(request,NO,responseObject,error);
+                failure(request,NO,responseObject,resultError);
             }
         }else{
             if (success) {

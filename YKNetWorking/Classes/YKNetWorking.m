@@ -318,10 +318,8 @@
             YKNetworkResponse *response = [[YKNetworkResponse alloc] init];
             if ([strongself handleError:request response:response isCache:isCache error:error]) {
                 if (strongself.handleResponse && responseObject) {
-                    response.rawData = responseObject;
-                    if (error) {
-                        response.code = error.code;
-                    }
+                    response.code = error.code;
+                    response.rawData = error;
                     NSError *error = strongself.handleResponse(response,request);
                     if (error) {
                         [subscriber sendError:error];
@@ -381,7 +379,9 @@
             YKNetworkResponse *response = [[YKNetworkResponse alloc] init];
             if ([strongself handleError:request response:response isCache:isCache error:error]) {
                 if (strongself.handleResponse && responseObject) {
-                    response.rawData = responseObject;
+//                    response.rawData = responseObject;
+                    response.code = error.code;
+                    response.rawData = error;
                     NSError *error = strongself.handleResponse(response,request);
                     if (error) {
                         [subscriber sendError:error];
@@ -440,7 +440,8 @@
             YKNetworkResponse *response = [[YKNetworkResponse alloc] init];
             if ([strongself handleError:request response:response isCache:isCache error:error]) {
                 if (strongself.handleResponse && responseObject) {
-                    response.rawData = responseObject;
+                    response.code = error.code;
+                    response.rawData = error;
                     NSError *error = strongself.handleResponse(response,request);
                     if (error) {
                         [subscriber sendError:error];
