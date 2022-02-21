@@ -7,11 +7,14 @@
 
 #import "YKNetworkingConfig.h"
 #import <AFNetworking/AFNetworking.h>
+#import <AFNetworking/AFNetworkReachabilityManager.h>
 
 @interface YKNetworkingConfig ()
 
 /// 网络状态
-@property(nonatomic,assign,readwrite) AFNetworkReachabilityStatus status;
+@property(nonatomic,assign,readwrite) YKNetworkingOnlineStatus status;
+/// 网络状态
+@property(nonatomic,assign,readwrite) AFNetworkReachabilityStatus afStatus;
 
 @end
 
@@ -40,11 +43,20 @@ static YKNetworkingConfig *_instance;
 - (void)changeStatus:(NSNotification *)notification
 {
     NSDictionary *dic = notification.userInfo;
-    self.status = [dic[@"status"]?:@"0" integerValue];
+    self.afStatus = [dic[@"status"]?:@"0" integerValue];
+    if (self.afStatus == AFNetworkReachabilityStatusUnknown) {
+        self.status = YKNetworkingOnlineStatusUnknown;
+    }else if (self.afStatus == AFNetworkReachabilityStatusNotReachable) {
+        self.status = YKNetworkingOnlineStatusNotReachable;
+    }else if (self.afStatus == AFNetworkReachabilityStatusReachableViaWWAN) {
+        self.status = YKNetworkingOnlineStatusReachableViaWWAN;
+    }else if (self.afStatus == AFNetworkReachabilityStatusReachableViaWiFi) {
+        self.status = YKNetworkingOnlineStatusReachableViaWiFi;
+    }
 }
 
 - (void)setParams:(NSDictionary *)params responseObj:(id)responseObj forUrl:(NSString *)url {
-//    [[MMCNetworkCache defaultManager] setObject:responseObj forRequestUrl:url params:params memoryOnly:NO];
+    
 }
 
 @end

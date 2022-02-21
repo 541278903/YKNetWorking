@@ -80,13 +80,16 @@ NS_ASSUME_NONNULL_BEGIN
 /// @param defaultParams 默认请求参数
 /// @param prefixUrl 默认地址前缀
 /// @param handleResponse 默认请求处理方法
-- (instancetype)initWithDefaultHeader:(NSDictionary<NSString *,NSString *> * _Nullable)defaultHeader  defaultParams:(NSDictionary * _Nullable)defaultParams prefixUrl:(NSString * _Nullable)prefixUrl andHandleResponse:(NSError *(^ _Nullable)(YKNetworkResponse *response,YKNetworkRequest *request) )handleResponse;
+- (instancetype)initWithDefaultHeader:(NSDictionary<NSString *,NSString *> * _Nullable)defaultHeader  defaultParams:(NSDictionary * _Nullable)defaultParams prefixUrl:(NSString * _Nullable)prefixUrl handleResponse:(NSError *(^ _Nullable)(YKNetworkResponse *response,YKNetworkRequest *request) )handleResponse;
 
 /// 请求地址
 - (YKNetWorking * (^)(NSString *url))url;
 
 /// 请求参数
 - (YKNetWorking * (^)(NSDictionary *_Nullable params))params;
+
+/// 请求头
+- (YKNetWorking * (^)(NSDictionary *_Nullable headers))headers;
 
 /// 请求模式
 - (YKNetWorking * (^)(YKNetworkRequestMethod metohd))method;

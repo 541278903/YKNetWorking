@@ -6,7 +6,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "RACTuple.h"
+#import <RACTuple.h>
 
 static inline id YKInvokeBlock(id block, NSArray *args) {
   NSCParameterAssert(block != NULL && args.count > 0);

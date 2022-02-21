@@ -6,11 +6,15 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "YKNetworkRequest.h"
+#import "YKNetworkResponse.h"
 
-//#import "MMCNetworkingConst.h"
-#import <AFNetworking/AFNetworkReachabilityManager.h>
-@class YKNetworkRequest;
-@class YKNetworkResponse;
+typedef NS_ENUM(NSInteger, YKNetworkingOnlineStatus) {
+    YKNetworkingOnlineStatusUnknown          = -1,
+    YKNetworkingOnlineStatusNotReachable     = 0,
+    YKNetworkingOnlineStatusReachableViaWWAN = 1,
+    YKNetworkingOnlineStatusReachableViaWiFi = 2,
+};
 
 @interface YKNetworkingConfig : NSObject
 
@@ -20,7 +24,7 @@
 #pragma mark ----------------------只读属性-----------------------------
 
 /// 网络状态
-@property(nonatomic,assign,readonly) AFNetworkReachabilityStatus status;
+@property(nonatomic,assign,readonly) YKNetworkingOnlineStatus status;
 
 #pragma mark ----------------------可写属性-----------------------------
 /** 超时时间 默认30秒 */

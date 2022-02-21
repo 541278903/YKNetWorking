@@ -3,7 +3,7 @@
 
 Pod::Spec.new do |spec|
   spec.name         = "YKNetWorking"
-  spec.version      = "0.2.0"
+  spec.version      = "0.2.1"
   spec.summary      = "A short description of YKNetWorking."
   spec.homepage     = "https://gitee.com/Edwrard/YKNetWorking.git"
   spec.license      = "MIT"

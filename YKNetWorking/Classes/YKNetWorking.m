@@ -22,14 +22,14 @@
 @property (nonatomic, strong)AFHTTPSessionManager *manager;
 /**当前状态*/
 @property (nonatomic, assign) AFNetworkReachabilityStatus networkStatus;
-/** 公用头部 */
-@property (nonatomic, copy) NSDictionary *defaultHeader;
-/** 公用参数 */
-@property (nonatomic, copy) NSDictionary *defaultParams;
 
 @property (nonatomic, strong) YKNetworkRequest *request;
 
 @property (nonatomic, strong) YKNetworkResponse *response;
+///
+@property (nonatomic, strong) NSDictionary *inputHeaders;
+///
+@property (nonatomic, strong) NSDictionary *inputParams;
 
 @end
 
@@ -58,20 +58,20 @@
     return self;
 }
 
-- (instancetype)initWithDefaultHeader:(NSDictionary<NSString *,NSString *> *)defaultHeader  defaultParams:(NSDictionary *)defaultParams  prefixUrl:(NSString *)prefixUrl
+- (instancetype)initWithCommonHeader:(NSDictionary<NSString *,NSString *> *)commonHeader  commonParams:(NSDictionary *)commonParams  prefixUrl:(NSString *)prefixUrl
 {
     self = [self init];
     if (self) {
-        self.defaultHeader = defaultHeader;
-        self.defaultParams = defaultParams;
+        self.commonHeader = commonHeader;
+        self.commonParams = commonParams;
         self.prefixUrl = prefixUrl;
     }
     return self;
 }
 
-- (instancetype)initWithDefaultHeader:(NSDictionary<NSString *,NSString *> * _Nullable)defaultHeader  defaultParams:(NSDictionary * _Nullable)defaultParams prefixUrl:(NSString * _Nullable)prefixUrl andHandleResponse:(NSError *(^ _Nullable)(YKNetworkResponse *response,YKNetworkRequest *request))handleResponse
+- (instancetype)initWithDefaultHeader:(NSDictionary<NSString *,NSString *> * _Nullable)defaultHeader  defaultParams:(NSDictionary * _Nullable)defaultParams prefixUrl:(NSString * _Nullable)prefixUrl handleResponse:(NSError *(^ _Nullable)(YKNetworkResponse *response,YKNetworkRequest *request))handleResponse
 {
-    self = [self initWithDefaultHeader:defaultHeader defaultParams:defaultHeader prefixUrl:prefixUrl];
+    self = [self initWithCommonHeader:defaultHeader commonParams:defaultHeader prefixUrl:prefixUrl];
     if (self) {
         self.handleResponse = handleResponse;
     }
@@ -127,29 +127,18 @@
     if(!_request)
     {
         _request = [[YKNetworkRequest alloc]init];
-        if(!self.ignoreDefaultHeader&&self.defaultHeader)
-        {
-            [self.defaultHeader enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
-                if (![_request.header.allKeys containsObject:key]) {
-                    [_request.header setValue:obj forKey:key];
-                }
-            }];
+        if(!self.ignoreDefaultHeader) {
+            [_request.header setValuesForKeysWithDictionary:[YKNetworkingConfig defaultConfig].defaultHeader];
         }
-        if(!self.ignoreDefaultParams&&self.defaultParams)
-        {
-            [self.defaultParams enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
-                if (![_request.params.allKeys containsObject:key]) {
-                    [_request.params setValue:obj forKey:key];
-                }
-            }];
-        }
-        if(self.commonHeader)
-        {
+        if (self.commonHeader) {
             [self.commonHeader enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
                 if (![_request.header.allKeys containsObject:key]) {
                     [_request.header setValue:obj forKey:key];
                 }
             }];
+        }
+        if(!self.ignoreDefaultParams) {
+            [_request.params setValuesForKeysWithDictionary:[YKNetworkingConfig defaultConfig].defaultParams];
         }
         if(self.commonParams)
         {
@@ -169,8 +158,22 @@
 {
     return ^YKNetWorking *(NSDictionary *params){
         if (params) {
+            self.inputParams = params;
             NSMutableDictionary *reqParams = [NSMutableDictionary dictionaryWithDictionary:params];
             [self.request.params setValuesForKeysWithDictionary:reqParams];
+        }
+        return self;
+    };
+}
+
+/// 请求头
+- (YKNetWorking * (^)(NSDictionary *_Nullable headers))headers
+{
+    return ^YKNetWorking *(NSDictionary *headers){
+        if (headers) {
+            self.inputHeaders = headers;
+            NSMutableDictionary *reqHeaders = [NSMutableDictionary dictionaryWithDictionary:headers];
+            [self.request.header setValuesForKeysWithDictionary:reqHeaders];
         }
         return self;
     };
