@@ -22,6 +22,8 @@
 		4131DA0E265213B800290EE8 /* YKNetWorking.podspec in Resources */ = {isa = PBXBuildFile; fileRef = 4131DA0D265213B800290EE8 /* YKNetWorking.podspec */; };
 		4131DA122652169F00290EE8 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 4131DA102652169F00290EE8 /* README.md */; };
 		4131DA132652169F00290EE8 /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 4131DA112652169F00290EE8 /* LICENSE */; };
+		99B70E3827C4E13200016805 /* YKNetworkResponseSerializer.m in Sources */ = {isa = PBXBuildFile; fileRef = 99B70E3227C4E13200016805 /* YKNetworkResponseSerializer.m */; };
+		99B70E3927C4E13200016805 /* YKBaseNetWorking.m in Sources */ = {isa = PBXBuildFile; fileRef = 99B70E3527C4E13200016805 /* YKBaseNetWorking.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -50,6 +52,12 @@
 		4131DA0D265213B800290EE8 /* YKNetWorking.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = YKNetWorking.podspec; sourceTree = "<group>"; };
 		4131DA102652169F00290EE8 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		4131DA112652169F00290EE8 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		99B70E3227C4E13200016805 /* YKNetworkResponseSerializer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YKNetworkResponseSerializer.m; sourceTree = "<group>"; };
+		99B70E3327C4E13200016805 /* YKBlockTrampoline.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YKBlockTrampoline.h; sourceTree = "<group>"; };
+		99B70E3427C4E13200016805 /* YKNetworkResponseSerializer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YKNetworkResponseSerializer.h; sourceTree = "<group>"; };
+		99B70E3527C4E13200016805 /* YKBaseNetWorking.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YKBaseNetWorking.m; sourceTree = "<group>"; };
+		99B70E3627C4E13200016805 /* YKNetWorkingConst.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YKNetWorkingConst.h; sourceTree = "<group>"; };
+		99B70E3727C4E13200016805 /* YKBaseNetWorking.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YKBaseNetWorking.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,6 +112,12 @@
 		4131D9FC265212D800290EE8 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				99B70E3727C4E13200016805 /* YKBaseNetWorking.h */,
+				99B70E3527C4E13200016805 /* YKBaseNetWorking.m */,
+				99B70E3327C4E13200016805 /* YKBlockTrampoline.h */,
+				99B70E3627C4E13200016805 /* YKNetWorkingConst.h */,
+				99B70E3427C4E13200016805 /* YKNetworkResponseSerializer.h */,
+				99B70E3227C4E13200016805 /* YKNetworkResponseSerializer.m */,
 				4131DA012652138200290EE8 /* RACSignal+networking.h */,
 				4131D9FE2652138200290EE8 /* RACSignal+networking.m */,
 				4131D9FD2652138200290EE8 /* YKNetWorking.h */,
@@ -195,6 +209,8 @@
 				4131D9EA265212B900290EE8 /* ViewController.m in Sources */,
 				4131DA072652138300290EE8 /* RACSignal+networking.m in Sources */,
 				4131D9E4265212B900290EE8 /* AppDelegate.m in Sources */,
+				99B70E3927C4E13200016805 /* YKBaseNetWorking.m in Sources */,
+				99B70E3827C4E13200016805 /* YKNetworkResponseSerializer.m in Sources */,
 				4131D9F5265212BA00290EE8 /* main.m in Sources */,
 				4131DA0A2652138300290EE8 /* YKNetWorking.m in Sources */,
 				4131DA092652138300290EE8 /* YKNetworkResponse.m in Sources */,
