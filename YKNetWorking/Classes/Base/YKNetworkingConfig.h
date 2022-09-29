@@ -55,9 +55,6 @@ typedef NS_ENUM(NSInteger, YKNetworkingOnlineStatus) {
 /** 动态添加请求头，每次执行网络请求前都会访问一遍 修改的值优先级最低 */
 @property (nonatomic, copy) NSDictionary *(^dynamicHeaderConfig)(YKNetworkRequest *request);
 
-/** 根据需求处理回调信息判断是否是正确的回调 即中转统一处理源数据 */
-@property (nonatomic, copy) NSError *(^handleResponse)(YKNetworkResponse *response,YKNetworkRequest *request);
-
 /** 根据需求设置缓存内容 */
 @property (nonatomic, copy) void(^cacheRequest)(YKNetworkResponse *response,YKNetworkRequest *request,BOOL isException);
 

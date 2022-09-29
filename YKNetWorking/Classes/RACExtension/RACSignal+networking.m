@@ -8,7 +8,6 @@
 
 #import "RACSignal+networking.h"
 #import "YKNetworkResponse.h"
-#import <MJExtension/MJExtension.h>
 
 @implementation RACSignal (networking)
 
@@ -32,30 +31,7 @@
         }
     }];
 }
-- (RACSignal *(^)(NSString *someThing,Class clazz))mapArrayWithSomething
-{
-    return ^RACSignal *(NSString *someThing,Class clazz) {
-        return [self map:^id(RACTuple *tuple) {
-            YKNetworkResponse *resp = tuple.second;
-            id obj;
-            if ([resp.rawData isKindOfClass:NSNull.class]) return nil;
-            if (!someThing || someThing.length == 0) {
-                obj = [clazz mj_objectArrayWithKeyValuesArray:resp.rawData];
-            } else {
-                if ([resp.rawData isKindOfClass:NSArray.class]) {
-                    obj = [clazz mj_objectArrayWithKeyValuesArray:resp.rawData];
-                } else if ([resp.rawData isKindOfClass:NSDictionary.class]) {
-                    if ([resp.rawData[someThing] isKindOfClass:NSNull.class]) return nil;
-                    obj = [clazz mj_objectArrayWithKeyValuesArray:resp.rawData[someThing]];
-                }
-            }
-            if (obj) {
-                return obj;
-            }
-            return nil;
-        }];
-    };
-}
+
 - (RACSignal *(^)(NSString *))mapWithSomething
 {
     return ^RACSignal *(NSString *someThing) {

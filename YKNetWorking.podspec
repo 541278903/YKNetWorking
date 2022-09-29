@@ -3,7 +3,7 @@
 
 Pod::Spec.new do |spec|
   spec.name         = "YKNetWorking"
-  spec.version      = "0.2.1"
+  spec.version      = "1.0.0"
   spec.summary      = "A short description of YKNetWorking."
   spec.homepage     = "https://gitee.com/Edwrard/YKNetWorking.git"
   spec.license      = "MIT"
@@ -12,14 +12,24 @@ Pod::Spec.new do |spec|
   spec.source       = { :git => "https://gitee.com/Edwrard/YKNetWorking.git",:tag => spec.version.to_s }
   spec.framework  = "UIKit","Foundation","AVFoundation","Photos","Security"
   
-  spec.dependency "AFNetworking"
-  spec.dependency "ReactiveObjC"
-  spec.dependency "MJExtension"
+  
+  spec.default_subspec = 'BaseModule'
+  
   
   #spec.prefix_header_file = "YKNetWorking.pch"
   
-  spec.source_files = 'YKNetWorking/Classes/*.{h,m,xib}'
+    spec.subspec "BaseModule" do |ss|
+#        ss.source_files = 'YKUMSDK/Classes/BaseModule/*'
+        ss.source_files = 'YKNetWorking/Classes/Base/*.{h,m,xib}'
+        ss.dependency "AFNetworking"
+
+    end
   
+    spec.subspec 'RACExtension' do |ss|
+      ss.source_files = 'YKNetWorking/Classes/RACExtension/*.{h,m,xib}'
+      
+      ss.dependency "ReactiveObjC"
+    end
   
 end
 

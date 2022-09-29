@@ -20,11 +20,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (RACSignal *)mapWithRawData;
 
 /**
- 映射出RawData中的某个键中的值并转成模型
- */
-- (RACSignal *(^)(NSString *someThing,Class clazz))mapArrayWithSomething;
-
-/**
  映射出RawData中的某个键中的值 必须是rawdata为字典
  */
 - (RACSignal *(^)(NSString *))mapWithSomething;

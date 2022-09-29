@@ -7,7 +7,6 @@
 //
 
 #import "YKNetworkRequest.h"
-//#import <MJExtension/MJExtension.h>
 
 @implementation YKNetworkRequest
 
