@@ -359,6 +359,7 @@
     } failureBlock:^(YKNetworkRequest * _Nonnull request, BOOL isCache, id  _Nullable responseObject, NSError * _Nonnull error) {
         __strong typeof(weakSelf) strongself = weakSelf;
         YKNetworkResponse *response = [[YKNetworkResponse alloc] init];
+        response.code = error.code;
         [strongself saveTask:request response:response isException:YES];
         executeRequest(response, request, error);
     }];
@@ -402,6 +403,7 @@
     } failure:^(YKNetworkRequest * _Nonnull request, BOOL isCache, id  _Nullable responseObject, NSError * _Nonnull error) {
         __strong typeof(weakSelf) strongself = weakSelf;
         YKNetworkResponse *response = [[YKNetworkResponse alloc] init];
+        response.code = error.code;
         [strongself saveTask:request response:response isException:YES];
         executeUploadRequest(response, request, error);
     }];
@@ -446,6 +448,7 @@
     } failure:^(YKNetworkRequest * _Nonnull request, BOOL isCache, id  _Nullable responseObject, NSError * _Nonnull error) {
         __strong typeof(weakSelf) strongself = weakSelf;
         YKNetworkResponse *response = [[YKNetworkResponse alloc] init];
+        response.code = error.code;
         [strongself saveTask:request response:response isException:YES];
         executeDownloadRequest(response, request, error);
     }];
