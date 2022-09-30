@@ -39,8 +39,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark ----------------------可写属性-----------------------------
 
-@property (nonatomic, strong) YKNetworkRequest *request;
-
 /** 通用请求头 */
 @property (nonatomic, copy) NSDictionary *commonHeader;
 
@@ -58,6 +56,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// 根据需求处理回调信息判断是否是正确的回调 即中转统一处理源数据
 @property (nonatomic, copy) NSError *(^handleResponse)(YKNetworkResponse *response,YKNetworkRequest *request);
+
+/** 请求前拦截请求体处理 如果需要取消请求则返回空值 */
+@property (nonatomic, copy) YKNetworkRequest *(^handleRequest)(YKNetworkRequest *request);
 
 /**
  动态参数的配置，每次执行请求都会加上这次的参数
@@ -145,8 +146,21 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark -----------非响应式编程可用以下调用常规方法------------
 
-- (void)execute;
+/**
+ 执行请求
+ */
+- (void)executeRequest:(void (^)(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request, NSError * _Nullable error))executeRequest;
 
+
+///**
+// 执行上传文件请求
+// */
+- (void)executeUploadRequest:(void (^)(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request, NSError * _Nullable error))executeUploadRequest;
+
+/**
+ 执行上传文件请求
+ */
+- (void)executeDownloadRequest:(void (^)(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request, NSError * _Nullable error))executeDownloadRequest;
 
 @end
 

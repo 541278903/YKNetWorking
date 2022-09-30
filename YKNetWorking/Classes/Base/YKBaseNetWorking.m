@@ -10,13 +10,36 @@
 #import "YKNetworkResponseSerializer.h"
 #import <AFNetworking/AFNetworking.h>
 
-@interface YKBaseNetWorking ()
+@interface YKBaseNetWorkingSessionManager : AFHTTPSessionManager
+
++ (instancetype)sharedInstance;
+
+@property (nonatomic, assign) AFNetworkReachabilityStatus networkStatus;
+
+@end
+
+@implementation YKBaseNetWorkingSessionManager
+
++ (instancetype)sharedInstance
+{
+    static YKBaseNetWorkingSessionManager *_sharedClient = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _sharedClient = [[YKBaseNetWorkingSessionManager alloc] initWithBaseURL:nil];
+        _sharedClient.securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
+        
+    });
+    
+    return _sharedClient;
+}
 
 @end
 
 @implementation YKBaseNetWorking
 
-+ (NSURLSessionTask *)requestWithRequest:(YKNetworkRequest *)request progressBlock:(progressBlockType)progressBlock successBlock:(successBlockType)successBlock failureBlock:(failureBlockType)failureBlock
++ (NSURLSessionTask *)requestWithRequest:(YKNetworkRequest *)request
+                            successBlock:(successBlockType)successBlock
+                            failureBlock:(failureBlockType)failureBlock
 {
     __block NSURLSessionDataTask *dataTask = nil;
     
@@ -31,11 +54,8 @@
         }
     }
     
-//    dataTask = [self executeTaskWith:request success:successBlock failure:failureBlock];
-    dataTask = [self executeTaskWith:request progress:progressBlock success:successBlock failure:failureBlock];
+    dataTask = [self executeTaskWith:request success:successBlock failure:failureBlock];
     
-    
-    request.task = dataTask;
     return dataTask;
     
 }
@@ -43,11 +63,10 @@
 
 #pragma mark ============ 执行请求内容 ==========
 + (NSURLSessionDataTask *)executeTaskWith:(YKNetworkRequest *)request
-                                 progress:(_Nullable progressBlockType)progress
                                   success:(_Nullable successBlockType)success
                                   failure:(_Nullable failureBlockType)failure
 {
-    AFHTTPSessionManager *mgr = [AFHTTPSessionManager manager];
+    YKBaseNetWorkingSessionManager *mgr = [YKBaseNetWorkingSessionManager sharedInstance];
     
     [YKBaseNetWorking configWithRequest:request manager:mgr];
     
@@ -66,8 +85,9 @@
     dataTask = [mgr dataTaskWithRequest:req uploadProgress:^(NSProgress * _Nonnull uploadProgress) {
         
     } downloadProgress:^(NSProgress * _Nonnull downloadProgress) {
-        if (progress) {
-            progress((float)downloadProgress.completedUnitCount / (float)downloadProgress.totalUnitCount);
+        
+        if (request.progressBlock) {
+            request.progressBlock((float)downloadProgress.completedUnitCount / (float)downloadProgress.totalUnitCount);
         }
     } completionHandler:^(NSURLResponse * _Nonnull response, id  _Nullable responseObject, NSError * _Nullable error) {
         NSInteger code = 200;
@@ -82,6 +102,8 @@
             }else{
                 resultError = [NSError errorWithDomain:@"YKNetworking" code:code userInfo:error.userInfo];
             }
+        }else {
+            resultError = error;
         }
         
         if (resultError) {
@@ -108,7 +130,6 @@
 #pragma mark ============ 执行上传请求内容 ==========
 
 + (NSURLSessionDataTask *)uploadTaskWith:(YKNetworkRequest *)request
-                     uploadProgressBlock:(progressBlockType)uploadProgressBlock
                                  success:(successBlockType)success
                                  failure:(failureBlockType)failure
 {
@@ -116,7 +137,7 @@
     
     if (request && request.uploadFileData&& request.uploadName&&request.uploadMimeType) {
         
-        AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
+        YKBaseNetWorkingSessionManager *manager = [YKBaseNetWorkingSessionManager sharedInstance];
         
         [YKBaseNetWorking configWithRequest:request manager:manager];
         
@@ -125,8 +146,8 @@
                 [formData appendPartWithFileData:request.uploadFileData name:request.fileFieldName fileName:request.uploadName mimeType:request.uploadMimeType];
             }
         } progress:^(NSProgress * _Nonnull uploadProgress) {
-            if (uploadProgressBlock) {
-                uploadProgressBlock((float)uploadProgress.completedUnitCount / (float)uploadProgress.totalUnitCount);
+            if (request.progressBlock) {
+                request.progressBlock((float)uploadProgress.completedUnitCount / (float)uploadProgress.totalUnitCount);
             }
         } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
             if (success) {
@@ -165,12 +186,11 @@
 #pragma mark ============ 执行下载请求内容 ==========
 
 + (NSURLSessionDownloadTask *)downloadTaskWith:(YKNetworkRequest *)request
-                          downloadProgressBlock:(progressBlockType)downloadProgressBlock
                                        success:(successBlockType)success
                                        failure:(failureBlockType)failure
 {
     
-    AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
+    YKBaseNetWorkingSessionManager *manager = [YKBaseNetWorkingSessionManager sharedInstance];
     
     [YKBaseNetWorking configWithRequest:request manager:manager];
     
@@ -179,8 +199,8 @@
     NSURLRequest *downloadRequest = [NSURLRequest requestWithURL:downloadURL];
     
     NSURLSessionDownloadTask *task = [manager downloadTaskWithRequest:downloadRequest progress:^(NSProgress * _Nonnull downloadProgress) {
-        if (downloadProgressBlock) {
-            downloadProgressBlock((float)downloadProgress.completedUnitCount / (float)downloadProgress.totalUnitCount);
+        if (request.progressBlock) {
+            request.progressBlock((float)downloadProgress.completedUnitCount / (float)downloadProgress.totalUnitCount);
         }
     } destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
         NSString *downloadPath = request.destPath;

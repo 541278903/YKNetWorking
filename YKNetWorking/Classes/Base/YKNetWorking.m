@@ -18,17 +18,20 @@
  */
 @property (nonatomic, strong, readwrite) NSMutableDictionary *requestDictionary;
 
-@property (nonatomic, strong)AFNetworkReachabilityManager *AfManager;
+@property (nonatomic, strong) AFNetworkReachabilityManager *AfManager;
 
-@property (nonatomic, strong)AFHTTPSessionManager *manager;
+@property (nonatomic, strong) AFHTTPSessionManager *manager;
 /**当前状态*/
 @property (nonatomic, assign) AFNetworkReachabilityStatus networkStatus;
+
+@property (nonatomic, strong) YKNetworkRequest *request;
 
 @property (nonatomic, strong) YKNetworkResponse *response;
 ///
 @property (nonatomic, strong) NSDictionary *inputHeaders;
 ///
 @property (nonatomic, strong) NSDictionary *inputParams;
+
 
 @end
 
@@ -48,7 +51,7 @@
         dispatch_once(&onceToken, ^{
             [[AFNetworkReachabilityManager sharedManager] startMonitoring];
             [[AFNetworkReachabilityManager sharedManager] setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
-                [[NSNotificationCenter defaultCenter] postNotificationName:kYKNetworking_NetworkStatus object:nil userInfo:@{@"status":@(status)}];
+                [[NSNotificationCenter defaultCenter] postNotificationName:yk_networking_NetworkStatus object:nil userInfo:@{@"status":@(status)}];
                 [[NSNotificationCenter defaultCenter] postNotificationName:@"toConfig" object:nil userInfo:@{@"status":@(status)}];
             }];
         });
@@ -286,14 +289,6 @@
     }
 }
 
-- (void)execute
-{
-    
-}
-
-
-
-
 - (void)cancelAllRequest
 {
     [self.requestDictionary enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, YKNetworkRequest * _Nonnull obj, BOOL * _Nonnull stop) {
@@ -323,6 +318,71 @@
         NSLog(@"请求已经完成或者没有name = %@的请求",name);
 #endif
     }
+}
+
+
+#pragma mark -----------非响应式编程可用以下调用常规方法------------
+
+/**
+ 执行请求
+ */
+- (void)executeRequest:(void (^)(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request, NSError * _Nullable error))executeRequest
+{
+    if (!executeRequest) {
+        return;
+    }
+    
+    YKNetworkRequest *request = [self.request copy];
+    BOOL canContinue = [self handleConfigWithRequest:request];
+    if (!canContinue) {
+        executeRequest([YKNetworkResponse new], request, [self createError:@"该请求不被允许"]);
+        return;
+    }
+    
+    if (self.handleRequest) {
+        request = self.handleRequest(request);
+        if (!request) {
+            executeRequest([YKNetworkResponse new], request, [self createError:@"请求不存在"]);
+            return;
+        }
+    }
+    __weak typeof(self) weakSelf = self;
+    request.task = [YKBaseNetWorking requestWithRequest:request successBlock:^(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request) {
+        __strong typeof(weakSelf) strongself = weakSelf;
+        if (strongself.handleResponse && !request.disableHandleResponse) {
+            NSError *error = strongself.handleResponse(response,request);
+            executeRequest(response, request, error);
+            [strongself saveTask:request response:response isException:(error != nil)];
+        }else{
+            executeRequest(response, request, nil);
+        }
+    } failureBlock:^(YKNetworkRequest * _Nonnull request, BOOL isCache, id  _Nullable responseObject, NSError * _Nonnull error) {
+        executeRequest([YKNetworkResponse new], request, error);
+    }];
+    
+    self.request = nil;
+}
+
+/**
+ 执行上传文件请求
+ */
+- (void)executeUploadRequest:(void (^)(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request, NSError * _Nullable error))executeUploadRequest
+{
+    
+}
+
+
+/**
+ 执行上传文件请求
+ */
+- (void)executeDownloadRequest:(void (^)(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request, NSError * _Nullable error))executeDownloadRequest
+{
+    
+}
+
+- (NSError *)createError:(NSString *)errorMessage
+{
+    return [NSError errorWithDomain:@"yk.oc.networking" code:-1 userInfo:@{NSLocalizedDescriptionKey:errorMessage}];
 }
 
 - (void)dealloc

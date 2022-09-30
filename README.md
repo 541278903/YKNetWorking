@@ -1,35 +1,29 @@
 # YKNetWorking
 
-[![Platform](https://img.shields.io/badge/platform-iOS-red.svg)](https://developer.apple.com/iphone/index.action) [![Language](http://img.shields.io/badge/language-OC-yellow.svg?style=flat )](https://en.wikipedia.org/wiki/Objective-C) [![License](https://img.shields.io/badge/license-MIT-blue.svg)](http://mit-license.org) [![CocoaPods Compatible](https://img.shields.io/badge/cocoapod-last-green.svg)](https://gitee.com/Edwrard/YKNetWorking)
+[![CI Status](https://img.shields.io/travis/edwardyyk/YKNetWorking.svg?style=flat)](https://travis-ci.org/edwardyyk/YKNetWorking)
+[![Version](https://img.shields.io/cocoapods/v/YKNetWorking.svg?style=flat)](https://cocoapods.org/pods/YKNetWorking)
+[![License](https://img.shields.io/cocoapods/l/YKNetWorking.svg?style=flat)](https://cocoapods.org/pods/YKNetWorking)
+[![Platform](https://img.shields.io/cocoapods/p/YKNetWorking.svg?style=flat)](https://cocoapods.org/pods/YKNetWorking)
 
-README.md
+## Example
 
-## How To Get Started
+To run the example project, clone the repo, and run `pod install` from the Example directory first.
 
-- add source at the top of the 'Podfile'
-```
-source 'https://gitee.com/Edwrard/YKSpec.git'  
-source 'https://github.com/CocoaPods/Specs.git'
-```
-- delete the row of 'use_frameworks!'
-
-## Communication
-
-- If you **need help**, use [Stack Overflow](https://stackoverflow.com/). 
-- If you'd like to **ask a general question**, use [Stack Overflow](https://stackoverflow.com/).
-- If you **found a bug**, _and can provide steps to reliably reproduce it_, open an issue.
-- If you **have a feature request**, open an issue.
-- If you **want to contribute**, submit a pull request.
+## Requirements
 
 ## Installation
-YKNetWorking supports multiple methods for installing the library in a project.
 
-## Installation with CocoaPods
-
-To integrate YKNetWorking into your Xcode project using CocoaPods, specify it in your `Podfile`:
+YKNetWorking is available through [CocoaPods](https://cocoapods.org). To install
+it, simply add the following line to your Podfile:
 
 ```ruby
 pod 'YKNetWorking'
 ```
 
+## Author
 
+edwardyyk, 534272374@qq.com
+
+## License
+
+YKNetWorking is available under the MIT license. See the LICENSE file for more info.

@@ -10,6 +10,15 @@
 
 @implementation YKNetworkRequest
 
+- (instancetype)init
+{
+    self = [super init];
+    if (self) {
+        self.responseType = YKNetworkResponseTypeJSON;
+    }
+    return self;
+}
+
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     YKNetworkRequest *request = [[YKNetworkRequest allocWithZone:zone] init];
     request.name = self.name;

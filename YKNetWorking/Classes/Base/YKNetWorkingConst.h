@@ -24,7 +24,7 @@
 #define kNoCacheErrorCode -10992
 
 /// 监听网络状态的通知
-#define kYKNetworking_NetworkStatus @"kYKNetworking_NetworkStatus"
+#define yk_networking_NetworkStatus @"yk_networking_NetworkStatus"
 
 
 /**

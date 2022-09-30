@@ -83,7 +83,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, copy) AFHTTPResponseSerializer *(^responseSerializerBlock)(AFHTTPResponseSerializer *);
 
 /** 请求Task 当启用假数据返回的时候为空 */
-@property (nonatomic, strong) NSURLSessionDataTask        *task;
+@property (nonatomic, strong) NSURLSessionTask  *task;
 
 /** 下载Task */
 @property (nonatomic, strong) NSURLSessionDownloadTask    *downloadTask;

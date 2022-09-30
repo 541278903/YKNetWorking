@@ -37,7 +37,9 @@
             [serializer validateResponse:response data:data error:&error];
             break;
         case YKNetworkResponseTypeAnyThing:
-            return nil;
+            serializer = [AFHTTPResponseSerializer serializer];
+            [serializer validateResponse:response data:data error:&error];
+            break;
         default:
             break;
     }
