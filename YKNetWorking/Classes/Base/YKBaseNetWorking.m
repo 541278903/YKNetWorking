@@ -203,11 +203,33 @@
             request.progressBlock((float)downloadProgress.completedUnitCount / (float)downloadProgress.totalUnitCount);
         }
     } destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
-        NSString *downloadPath = request.destPath;
-        NSFileManager *filemanager = [NSFileManager defaultManager];
-        [filemanager createDirectoryAtPath:downloadPath withIntermediateDirectories:YES attributes:nil error:nil];
-        NSString *filePath = [downloadPath stringByAppendingPathComponent:response.suggestedFilename];
-        return [NSURL fileURLWithPath:filePath];
+        
+        NSURL *documentsURL = [[[NSFileManager defaultManager] URLsForDirectory:NSCachesDirectory inDomains:NSUserDomainMask] firstObject];
+        
+        NSString *urllastPathComponent = [NSURL URLWithString:request.urlStr].lastPathComponent;
+        
+        if (request.destPath.length > 0) {
+            if ([[request.destPath substringToIndex:1] isEqualToString:@"/"]) {
+                [documentsURL URLByAppendingPathComponent:[request.destPath substringFromIndex:1]];
+            }else {
+                [documentsURL URLByAppendingPathComponent:request.destPath];
+            }
+        }
+        BOOL isDic;
+        BOOL existes = [[NSFileManager defaultManager] fileExistsAtPath:documentsURL.relativePath isDirectory:&isDic];
+        if (existes && isDic) {
+            [documentsURL URLByAppendingPathComponent:[NSString stringWithFormat:@"%@",urllastPathComponent]];
+        }else if (existes) {
+            
+        }else {
+            NSError *err = nil;
+            [[NSFileManager defaultManager] createDirectoryAtPath:documentsURL.relativePath withIntermediateDirectories:YES attributes:@{} error:&err];
+            if (err != nil) {
+                [documentsURL URLByAppendingPathComponent:[NSString stringWithFormat:@"%@",urllastPathComponent]];
+            }
+        }
+        
+        return documentsURL;
     } completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
         if (success && !error) {
             YKNetworkResponse *response = [[YKNetworkResponse alloc] init];

@@ -49,7 +49,7 @@
 {
     YKNetWorking *networking = [[YKNetWorking alloc] init];
     
-    networking = networking.get(@"https://www.baidu.com");
+    networking = networking.get(@"https://static-page.yauui.cn/protocol/xm/protocol.html");
     
     networking = networking.params(@{});
     
@@ -57,7 +57,9 @@
     
     networking = networking.responseType(YKNetworkResponseTypeHTTP);
     
-    [networking executeRequest:^(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request, NSError * _Nullable error) {
+    networking = networking.downloadDestPath(@"/desc/");
+    
+    [networking executeDownloadRequest:^(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request, NSError * _Nullable error) {
         NSLog(@"%@",response.rawData);
     }];
 }

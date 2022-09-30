@@ -357,7 +357,10 @@
             executeRequest(response, request, nil);
         }
     } failureBlock:^(YKNetworkRequest * _Nonnull request, BOOL isCache, id  _Nullable responseObject, NSError * _Nonnull error) {
-        executeRequest([YKNetworkResponse new], request, error);
+        __strong typeof(weakSelf) strongself = weakSelf;
+        YKNetworkResponse *response = [[YKNetworkResponse alloc] init];
+        [strongself saveTask:request response:response isException:YES];
+        executeRequest(response, request, error);
     }];
     
     self.request = nil;
@@ -368,7 +371,42 @@
  */
 - (void)executeUploadRequest:(void (^)(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request, NSError * _Nullable error))executeUploadRequest
 {
+    if (!executeUploadRequest) {
+        return;
+    }
     
+    YKNetworkRequest *request = [self.request copy];
+    BOOL canContinue = [self handleConfigWithRequest:request];
+    if (!canContinue) {
+        executeUploadRequest([YKNetworkResponse new], request, [self createError:@"该请求不被允许"]);
+        return;
+    }
+    
+    if (self.handleRequest) {
+        request = self.handleRequest(request);
+        if (!request) {
+            executeUploadRequest([YKNetworkResponse new], request, [self createError:@"请求不存在"]);
+            return;
+        }
+    }
+    __weak typeof(self) weakSelf = self;
+    request.task = [YKBaseNetWorking uploadTaskWith:request success:^(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request) {
+        __strong typeof(weakSelf) strongself = weakSelf;
+        if (strongself.handleResponse && !request.disableHandleResponse) {
+            NSError *error = strongself.handleResponse(response,request);
+            executeUploadRequest(response, request, error);
+            [strongself saveTask:request response:response isException:(error != nil)];
+        }else{
+            executeUploadRequest(response, request, nil);
+        }
+    } failure:^(YKNetworkRequest * _Nonnull request, BOOL isCache, id  _Nullable responseObject, NSError * _Nonnull error) {
+        __strong typeof(weakSelf) strongself = weakSelf;
+        YKNetworkResponse *response = [[YKNetworkResponse alloc] init];
+        [strongself saveTask:request response:response isException:YES];
+        executeUploadRequest(response, request, error);
+    }];
+    
+    self.request = nil;
 }
 
 
@@ -377,7 +415,42 @@
  */
 - (void)executeDownloadRequest:(void (^)(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request, NSError * _Nullable error))executeDownloadRequest
 {
+    if (!executeDownloadRequest) {
+        return;
+    }
     
+    YKNetworkRequest *request = [self.request copy];
+    BOOL canContinue = [self handleConfigWithRequest:request];
+    if (!canContinue) {
+        executeDownloadRequest([YKNetworkResponse new], request, [self createError:@"该请求不被允许"]);
+        return;
+    }
+    
+    if (self.handleRequest) {
+        request = self.handleRequest(request);
+        if (!request) {
+            executeDownloadRequest([YKNetworkResponse new], request, [self createError:@"请求不存在"]);
+            return;
+        }
+    }
+    __weak typeof(self) weakSelf = self;
+    request.task = [YKBaseNetWorking downloadTaskWith:request success:^(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request) {
+        __strong typeof(weakSelf) strongself = weakSelf;
+        if (strongself.handleResponse && !request.disableHandleResponse) {
+            NSError *error = strongself.handleResponse(response,request);
+            executeDownloadRequest(response, request, error);
+            [strongself saveTask:request response:response isException:(error != nil)];
+        }else{
+            executeDownloadRequest(response, request, nil);
+        }
+    } failure:^(YKNetworkRequest * _Nonnull request, BOOL isCache, id  _Nullable responseObject, NSError * _Nonnull error) {
+        __strong typeof(weakSelf) strongself = weakSelf;
+        YKNetworkResponse *response = [[YKNetworkResponse alloc] init];
+        [strongself saveTask:request response:response isException:YES];
+        executeDownloadRequest(response, request, error);
+    }];
+    
+    self.request = nil;
 }
 
 - (NSError *)createError:(NSString *)errorMessage
