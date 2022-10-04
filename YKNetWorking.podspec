@@ -29,9 +29,9 @@ TODO: Add long description of the pod here.
   s.ios.deployment_target = '10.0'
 
   
-  s.default_subspec = 'BaseModule'
+  s.default_subspec = 'Core'
   
-  s.subspec "BaseModule" do |ss|
+  s.subspec "Core" do |ss|
       ss.source_files = 'YKNetWorking/Classes/Base/*.{h,m,xib}'
       ss.dependency "AFNetworking"
   end
