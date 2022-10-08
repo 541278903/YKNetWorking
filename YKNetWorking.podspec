@@ -38,7 +38,7 @@ TODO: Add long description of the pod here.
 
   s.subspec 'RACExtension' do |ss|
     ss.source_files = 'YKNetWorking/Classes/RACExtension/*.{h,m,xib}'
-    ss.dependency "YKNetWorking/BaseModule"
+    ss.dependency "YKNetWorking/Core"
     
     ss.dependency "ReactiveObjC"
   end
