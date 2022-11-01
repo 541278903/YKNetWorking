@@ -15,6 +15,9 @@
     self = [super init];
     if (self) {
         self.responseType = YKNetworkResponseTypeJSON;
+        self.disableDynamicParams = NO;
+        self.disableDynamicHeader = NO;
+        self.disableHandleResponse = NO;
     }
     return self;
 }
@@ -44,6 +47,7 @@
     request.responseSerializerBlock = self.responseSerializerBlock;
     request.task = self.task;
     request.downloadTask = self.downloadTask;
+    request.handleResponse = self.handleResponse;
     return request;
 }
 - (NSMutableDictionary *)params {

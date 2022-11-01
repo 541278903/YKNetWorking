@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <AFNetworking/AFNetworking.h>
 #import "YKNetWorkingConst.h"
+@class YKNetworkResponse,YKNetworkResponse;
 
 
 NS_ASSUME_NONNULL_BEGIN
@@ -87,6 +88,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 /** 下载Task */
 @property (nonatomic, strong) NSURLSessionDownloadTask    *downloadTask;
+
+
+/// 根据需求处理回调信息判断是否是正确的回调 即中转统一处理源数据
+@property (nonatomic, copy) NSError *(^handleResponse)(YKNetworkResponse *response,YKNetworkRequest *request);
+
 
 #pragma mark -----------❌unUse❌(后续拓展才会真正使用到，敬请期待)------------
 

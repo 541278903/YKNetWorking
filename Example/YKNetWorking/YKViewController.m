@@ -45,36 +45,135 @@
 
 @implementation YKViewController
 
-- (void)demo_execute
+- (void)demo_execute_get
 {
     YKNetWorking *networking = [[YKNetWorking alloc] init];
     
-    networking = networking.get(@"https://static-page.yauui.cn/protocol/xm/protocol.html");
+    networking.handleRequest = ^YKNetworkRequest * _Nonnull(YKNetworkRequest * _Nonnull request) {
+        //对请求的头部进行修改，可自行修改自己调整的内容
+        request.urlStr = @"https://www.baidu.com";
+        
+        
+        //返回nil将中止本次请求
+        
+        return request;
+    };
     
+    networking.handleResponse = ^NSError * _Nonnull(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request) {
+        //对回调的数据预处理
+        
+        
+        //将想要的数据重新组合放入到rawData里
+        response.rawData = @{@"hello":@"123"};
+        
+        
+        //如果数据中某部分内容不符合预期可以直接返回error 内部将以接口报错的形式将此处的错误返回到外部
+        if (NO) {
+            return [NSError errorWithDomain:@"yk.networking" code:-1 userInfo:@{
+                NSLocalizedFailureReasonErrorKey:@"内容不符合预期，报错"
+            }];
+        }
+       
+        return nil;
+    };
+    
+    if (YES) {
+        networking = networking.get(@"https://cctalk.hjapi.com/basic/v1.1/appconfig/list");
+    }else {
+        // 此处上下为等价公式↑ ↓
+        networking = networking.method(YKNetworkRequestMethodGET).url(@"https://cctalk.hjapi.com/basic/v1.1/appconfig/list");
+    }
+    
+    //设置本次请求的参数
     networking = networking.params(@{});
     
+    //设置本次请求的头部信息
     networking = networking.headers(@{});
     
-    networking = networking.responseType(YKNetworkResponseTypeHTTP);
+    //设置本次请求的返回格式（默认JSON）
+    networking = networking.responseType(YKNetworkResponseTypeJSON);
     
-    networking = networking.downloadDestPath(@"/desc/");
-    
-    [networking executeDownloadRequest:^(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request, NSError * _Nullable error) {
+    //开始请求
+    [networking executeRequest:^(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request, NSError * _Nullable error) {
+        //此处的结果会先处理刚刚的预处理行为后的内容
         NSLog(@"%@",response.rawData);
     }];
 }
 
+- (void)demo_execute_post
+{
+    YKNetWorking *networking = [[YKNetWorking alloc] init];
+    
+    networking.handleRequest = ^YKNetworkRequest * _Nonnull(YKNetworkRequest * _Nonnull request) {
+        //对请求的头部进行修改，可自行修改自己调整的内容
+//        request.urlStr = @"https://www.baidu.com";
+        
+        
+        //返回nil将中止本次请求
+        
+        return request;
+    };
+    
+    networking.handleResponse = ^NSError * _Nonnull(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request) {
+        //对回调的数据预处理
+        
+        
+        //将想要的数据重新组合放入到rawData里
+//        response.rawData = @{@"hello":@"123"};
+        
+        
+        //如果数据中某部分内容不符合预期可以直接返回error 内部将以接口报错的形式将此处的错误返回到外部
+        if (NO) {
+            return [NSError errorWithDomain:@"yk.networking" code:-1 userInfo:@{
+                NSLocalizedFailureReasonErrorKey:@"内容不符合预期，报错"
+            }];
+        }
+       
+        return nil;
+    };
+    
+    if (YES) {
+        networking = networking.post(@"http://japi.juhe.cn/charconvert/change.from");
+    }else {
+        // 此处上下为等价公式↑ ↓
+        networking = networking.method(YKNetworkRequestMethodPOST).url(@"http://japi.juhe.cn/charconvert/change.from");
+    }
+    
+    //设置本次请求的参数
+    networking = networking.params(@{@"text":@"我是谁",@"type":@"2",@"key":@"0e27c575047e83b407ff9e517cde9c76"});
+    
+    //设置本次请求的头部信息
+    networking = networking.headers(@{});
+    
+    //设置本次请求的返回格式（默认JSON）
+    networking = networking.responseType(YKNetworkResponseTypeHTTP);
+    
+    //开始请求
+    [networking executeRequest:^(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request, NSError * _Nullable error) {
+        //此处的结果会先处理刚刚的预处理行为后的内容
+        NSString *datajsonstr = [[NSString alloc] initWithData:((NSData *)response.rawData) encoding:NSUTF8StringEncoding];
+        NSLog(@"%@",datajsonstr);
+    }];
+}
+
+- (void)demo_rx_execute_get
+{
+    
+}
 
 - (void)reloadDataSource
 {
     [self.dataSource removeAllObjects];
     
     __weak typeof(self) weakSelf = self;
-    [self.dataSource addObject:[YKNetworkingTestModel createModel:@"请求" todoCallBack:^{
+    [self.dataSource addObject:[YKNetworkingTestModel createModel:@"请求GET" todoCallBack:^{
 //        NSLog(@"点击");
-        [weakSelf demo_execute];
+        [weakSelf demo_execute_get];
     }]];
     
+    [self.dataSource addObject:[YKNetworkingTestModel createModel:@"请求POST" todoCallBack:^{
+        [weakSelf demo_execute_post];
+    }]];
 }
 
 
@@ -112,12 +211,12 @@
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return 78;
+    return 30;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView estimatedHeightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return 40;
+    return 30;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath

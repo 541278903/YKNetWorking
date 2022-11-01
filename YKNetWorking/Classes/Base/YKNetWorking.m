@@ -47,14 +47,7 @@
         self.manager.responseSerializer = [AFHTTPResponseSerializer serializer];
         //设置参数类型ContentTypes，在后面的array中添加形式即可，最终会转成nsset
         self.manager.responseSerializer.acceptableContentTypes = [NSSet setWithArray:@[@"text/plain",@"text/xml",@"application/json",@"application/octet-stream",@"multipart/form-data"]];
-        static dispatch_once_t onceToken;
-        dispatch_once(&onceToken, ^{
-            [[AFNetworkReachabilityManager sharedManager] startMonitoring];
-            [[AFNetworkReachabilityManager sharedManager] setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
-                [[NSNotificationCenter defaultCenter] postNotificationName:yk_networking_NetworkStatus object:nil userInfo:@{@"status":@(status)}];
-                [[NSNotificationCenter defaultCenter] postNotificationName:@"toConfig" object:nil userInfo:@{@"status":@(status)}];
-            }];
-        });
+        
         [YKNetworkingConfig defaultConfig];
     }
     return self;
@@ -150,6 +143,7 @@
                 }
             }];
         }
+        _request.handleResponse = self.handleResponse;
         
         
     }
@@ -349,8 +343,8 @@
     __weak typeof(self) weakSelf = self;
     request.task = [YKBaseNetWorking requestWithRequest:request successBlock:^(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request) {
         __strong typeof(weakSelf) strongself = weakSelf;
-        if (strongself.handleResponse && !request.disableHandleResponse) {
-            NSError *error = strongself.handleResponse(response,request);
+        if ((request.handleResponse != nil) && !request.disableHandleResponse) {
+            NSError *error = request.handleResponse(response,request);
             executeRequest(response, request, error);
             [strongself saveTask:request response:response isException:(error != nil)];
         }else{
@@ -360,6 +354,7 @@
         __strong typeof(weakSelf) strongself = weakSelf;
         YKNetworkResponse *response = [[YKNetworkResponse alloc] init];
         response.code = error.code;
+        response.rawData = responseObject;
         [strongself saveTask:request response:response isException:YES];
         executeRequest(response, request, error);
     }];
@@ -393,8 +388,8 @@
     __weak typeof(self) weakSelf = self;
     request.task = [YKBaseNetWorking uploadTaskWith:request success:^(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request) {
         __strong typeof(weakSelf) strongself = weakSelf;
-        if (strongself.handleResponse && !request.disableHandleResponse) {
-            NSError *error = strongself.handleResponse(response,request);
+        if (request.handleResponse && !request.disableHandleResponse) {
+            NSError *error = request.handleResponse(response,request);
             executeUploadRequest(response, request, error);
             [strongself saveTask:request response:response isException:(error != nil)];
         }else{
@@ -404,6 +399,7 @@
         __strong typeof(weakSelf) strongself = weakSelf;
         YKNetworkResponse *response = [[YKNetworkResponse alloc] init];
         response.code = error.code;
+        response.rawData = responseObject;
         [strongself saveTask:request response:response isException:YES];
         executeUploadRequest(response, request, error);
     }];
@@ -438,8 +434,8 @@
     __weak typeof(self) weakSelf = self;
     request.task = [YKBaseNetWorking downloadTaskWith:request success:^(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request) {
         __strong typeof(weakSelf) strongself = weakSelf;
-        if (strongself.handleResponse && !request.disableHandleResponse) {
-            NSError *error = strongself.handleResponse(response,request);
+        if (request.handleResponse && !request.disableHandleResponse) {
+            NSError *error = request.handleResponse(response,request);
             executeDownloadRequest(response, request, error);
             [strongself saveTask:request response:response isException:(error != nil)];
         }else{
@@ -449,6 +445,7 @@
         __strong typeof(weakSelf) strongself = weakSelf;
         YKNetworkResponse *response = [[YKNetworkResponse alloc] init];
         response.code = error.code;
+        response.rawData = responseObject;
         [strongself saveTask:request response:response isException:YES];
         executeDownloadRequest(response, request, error);
     }];
@@ -485,6 +482,11 @@
         _requestDictionary = [NSMutableDictionary dictionary];
     }
     return _requestDictionary;
+}
+
+- (void)setHandleResponse:(NSError * _Nonnull (^)(YKNetworkResponse * _Nonnull, YKNetworkRequest * _Nonnull))handleResponse
+{
+    _handleResponse = handleResponse;
 }
 
 @end
