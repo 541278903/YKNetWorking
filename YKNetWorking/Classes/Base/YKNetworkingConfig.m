@@ -36,6 +36,15 @@ static YKNetworkingConfig *_instance;
         _instance = [[self alloc] init];
         _instance.distinguishError = YES;
         _instance.timeoutInterval = 30;
+        
+        static dispatch_once_t onceToken;
+        dispatch_once(&onceToken, ^{
+            [[AFNetworkReachabilityManager sharedManager] startMonitoring];
+            [[AFNetworkReachabilityManager sharedManager] setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
+                [[NSNotificationCenter defaultCenter] postNotificationName:yk_networking_NetworkStatus object:nil userInfo:@{@"status":@(status)}];
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"toConfig" object:nil userInfo:@{@"status":@(status)}];
+            }];
+        });
     }
     return _instance;
 }
