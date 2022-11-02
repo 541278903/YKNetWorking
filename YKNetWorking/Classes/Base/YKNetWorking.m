@@ -208,17 +208,19 @@
 {
     return ^YKNetWorking *(NSString *destPath) {
         self.request.destPath = destPath;
+        self.request.executeMode = YKNetworkExecuteModeDownload;
         return self;
     };
 }
 
-- (YKNetWorking * _Nonnull (^)(NSData * _Nonnull, NSString * _Nonnull, NSString * _Nonnull))uploadData
+- (YKNetWorking * _Nonnull (^)(NSData * _Nonnull, NSString * _Nonnull, NSString * _Nonnull, NSString * _Nonnull))uploadData
 {
-    return ^YKNetWorking *(NSData *data,NSString *filename,NSString * mimeType){
+    return ^YKNetWorking *(NSData *data,NSString *filename,NSString * mimeType,NSString *fileFieldName){
         self.request.uploadFileData = data;
         self.request.uploadName = filename;
         self.request.uploadMimeType = mimeType;
-        
+        self.request.fileFieldName = fileFieldName;
+        self.request.executeMode = YKNetworkExecuteModeUpload;
         return self;
     };
 }
@@ -245,14 +247,6 @@
 - (YKNetWorking * (^)(YKNetworkRequestParamsType paramsType))paramsType {
     return ^YKNetWorking *(YKNetworkRequestParamsType paramsType) {
         self.request.paramsType = paramsType;
-        return self;
-    };
-}
-
-- (YKNetWorking *(^)(NSString *fileField))fileFieldName
-{
-    return ^YKNetWorking *(NSString *fileField) {
-        self.request.fileFieldName = fileField;
         return self;
     };
 }
@@ -329,133 +323,107 @@
     YKNetworkRequest *request = [self.request copy];
     BOOL canContinue = [self handleConfigWithRequest:request];
     if (!canContinue) {
-        executeRequest([YKNetworkResponse new], request, [self createError:@"该请求不被允许"]);
+        executeRequest([YKNetworkResponse new], request, [self createError:@"该请求不被允许" suggestion:@"请检查请求头内容"]);
         return;
     }
     
     if (self.handleRequest) {
         request = self.handleRequest(request);
         if (!request) {
-            executeRequest([YKNetworkResponse new], request, [self createError:@"请求不存在"]);
+            executeRequest([YKNetworkResponse new], request, [self createError:@"请求不存在" suggestion:@"请检查请求头内容"]);
             return;
         }
     }
     __weak typeof(self) weakSelf = self;
-    request.task = [YKBaseNetWorking requestWithRequest:request successBlock:^(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request) {
-        __strong typeof(weakSelf) strongself = weakSelf;
-        if ((request.handleResponse != nil) && !request.disableHandleResponse) {
-            NSError *error = request.handleResponse(response,request);
-            executeRequest(response, request, error);
-            [strongself saveTask:request response:response isException:(error != nil)];
-        }else{
-            executeRequest(response, request, nil);
+    
+    switch (request.executeMode) {
+        case YKNetworkExecuteModeNormal:
+        {
+            //MARK: 普通请求
+            request.task = [YKBaseNetWorking requestWithRequest:request successBlock:^(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request) {
+                __strong typeof(weakSelf) strongself = weakSelf;
+                if ((request.handleResponse != nil) && !request.disableHandleResponse) {
+                    NSError *error = request.handleResponse(response,request);
+                    executeRequest(response, request, error);
+                    [strongself saveTask:request response:response isException:(error != nil)];
+                }else{
+                    executeRequest(response, request, nil);
+                }
+            } failureBlock:^(YKNetworkRequest * _Nonnull request, BOOL isCache, id  _Nullable responseObject, NSError * _Nonnull error) {
+                __strong typeof(weakSelf) strongself = weakSelf;
+                YKNetworkResponse *response = [[YKNetworkResponse alloc] init];
+                response.code = error.code;
+                response.rawData = responseObject;
+                [strongself saveTask:request response:response isException:YES];
+                executeRequest(response, request, error);
+            }];
+            
+            break;
         }
-    } failureBlock:^(YKNetworkRequest * _Nonnull request, BOOL isCache, id  _Nullable responseObject, NSError * _Nonnull error) {
-        __strong typeof(weakSelf) strongself = weakSelf;
-        YKNetworkResponse *response = [[YKNetworkResponse alloc] init];
-        response.code = error.code;
-        response.rawData = responseObject;
-        [strongself saveTask:request response:response isException:YES];
-        executeRequest(response, request, error);
-    }];
+        case YKNetworkExecuteModeUpload:
+        {
+            //MARK: 上传请求
+            request.task = [YKBaseNetWorking uploadTaskWith:request success:^(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request) {
+                __strong typeof(weakSelf) strongself = weakSelf;
+                if (request.handleResponse && !request.disableHandleResponse) {
+                    NSError *error = request.handleResponse(response,request);
+                    executeRequest(response, request, error);
+                    [strongself saveTask:request response:response isException:(error != nil)];
+                }else{
+                    executeRequest(response, request, nil);
+                }
+            } failure:^(YKNetworkRequest * _Nonnull request, BOOL isCache, id  _Nullable responseObject, NSError * _Nonnull error) {
+                __strong typeof(weakSelf) strongself = weakSelf;
+                YKNetworkResponse *response = [[YKNetworkResponse alloc] init];
+                response.code = error.code;
+                response.rawData = responseObject;
+                [strongself saveTask:request response:response isException:YES];
+                executeRequest(response, request, error);
+            }];
+            
+            break;
+        }
+        case YKNetworkExecuteModeDownload:
+        {
+            //MARK: 下载请求
+            request.task = [YKBaseNetWorking downloadTaskWith:request success:^(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request) {
+                __strong typeof(weakSelf) strongself = weakSelf;
+                if (request.handleResponse && !request.disableHandleResponse) {
+                    NSError *error = request.handleResponse(response,request);
+                    executeRequest(response, request, error);
+                    [strongself saveTask:request response:response isException:(error != nil)];
+                }else{
+                    executeRequest(response, request, nil);
+                }
+            } failure:^(YKNetworkRequest * _Nonnull request, BOOL isCache, id  _Nullable responseObject, NSError * _Nonnull error) {
+                __strong typeof(weakSelf) strongself = weakSelf;
+                YKNetworkResponse *response = [[YKNetworkResponse alloc] init];
+                response.code = error.code;
+                response.rawData = responseObject;
+                [strongself saveTask:request response:response isException:YES];
+                executeRequest(response, request, error);
+            }];
+            
+            break;
+        }
+        default:
+            break;
+    }
+    
+    
+    
     
     self.request = nil;
 }
 
-/**
- 执行上传文件请求
- */
-- (void)executeUploadRequest:(void (^)(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request, NSError * _Nullable error))executeUploadRequest
+
+- (NSError *)createError:(NSString *)errorMessage suggestion:(NSString *)suggestion
 {
-    if (!executeUploadRequest) {
-        return;
-    }
-    
-    YKNetworkRequest *request = [self.request copy];
-    BOOL canContinue = [self handleConfigWithRequest:request];
-    if (!canContinue) {
-        executeUploadRequest([YKNetworkResponse new], request, [self createError:@"该请求不被允许"]);
-        return;
-    }
-    
-    if (self.handleRequest) {
-        request = self.handleRequest(request);
-        if (!request) {
-            executeUploadRequest([YKNetworkResponse new], request, [self createError:@"请求不存在"]);
-            return;
-        }
-    }
-    __weak typeof(self) weakSelf = self;
-    request.task = [YKBaseNetWorking uploadTaskWith:request success:^(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request) {
-        __strong typeof(weakSelf) strongself = weakSelf;
-        if (request.handleResponse && !request.disableHandleResponse) {
-            NSError *error = request.handleResponse(response,request);
-            executeUploadRequest(response, request, error);
-            [strongself saveTask:request response:response isException:(error != nil)];
-        }else{
-            executeUploadRequest(response, request, nil);
-        }
-    } failure:^(YKNetworkRequest * _Nonnull request, BOOL isCache, id  _Nullable responseObject, NSError * _Nonnull error) {
-        __strong typeof(weakSelf) strongself = weakSelf;
-        YKNetworkResponse *response = [[YKNetworkResponse alloc] init];
-        response.code = error.code;
-        response.rawData = responseObject;
-        [strongself saveTask:request response:response isException:YES];
-        executeUploadRequest(response, request, error);
+    return [NSError errorWithDomain:@"yk.oc.networking" code:-1 userInfo:@{
+        NSLocalizedDescriptionKey:errorMessage,
+        NSLocalizedFailureReasonErrorKey:errorMessage,
+        NSLocalizedRecoverySuggestionErrorKey:suggestion
     }];
-    
-    self.request = nil;
-}
-
-
-/**
- 执行上传文件请求
- */
-- (void)executeDownloadRequest:(void (^)(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request, NSError * _Nullable error))executeDownloadRequest
-{
-    if (!executeDownloadRequest) {
-        return;
-    }
-    
-    YKNetworkRequest *request = [self.request copy];
-    BOOL canContinue = [self handleConfigWithRequest:request];
-    if (!canContinue) {
-        executeDownloadRequest([YKNetworkResponse new], request, [self createError:@"该请求不被允许"]);
-        return;
-    }
-    
-    if (self.handleRequest) {
-        request = self.handleRequest(request);
-        if (!request) {
-            executeDownloadRequest([YKNetworkResponse new], request, [self createError:@"请求不存在"]);
-            return;
-        }
-    }
-    __weak typeof(self) weakSelf = self;
-    request.task = [YKBaseNetWorking downloadTaskWith:request success:^(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request) {
-        __strong typeof(weakSelf) strongself = weakSelf;
-        if (request.handleResponse && !request.disableHandleResponse) {
-            NSError *error = request.handleResponse(response,request);
-            executeDownloadRequest(response, request, error);
-            [strongself saveTask:request response:response isException:(error != nil)];
-        }else{
-            executeDownloadRequest(response, request, nil);
-        }
-    } failure:^(YKNetworkRequest * _Nonnull request, BOOL isCache, id  _Nullable responseObject, NSError * _Nonnull error) {
-        __strong typeof(weakSelf) strongself = weakSelf;
-        YKNetworkResponse *response = [[YKNetworkResponse alloc] init];
-        response.code = error.code;
-        response.rawData = responseObject;
-        [strongself saveTask:request response:response isException:YES];
-        executeDownloadRequest(response, request, error);
-    }];
-    
-    self.request = nil;
-}
-
-- (NSError *)createError:(NSString *)errorMessage
-{
-    return [NSError errorWithDomain:@"yk.oc.networking" code:-1 userInfo:@{NSLocalizedDescriptionKey:errorMessage}];
 }
 
 - (void)dealloc

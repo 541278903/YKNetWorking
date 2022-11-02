@@ -204,32 +204,47 @@
         }
     } destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
         
-        NSURL *documentsURL = [[[NSFileManager defaultManager] URLsForDirectory:NSCachesDirectory inDomains:NSUserDomainMask] firstObject];
+        NSString *cachePath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
         
         NSString *urllastPathComponent = [NSURL URLWithString:request.urlStr].lastPathComponent;
         
         if (request.destPath.length > 0) {
             if ([[request.destPath substringToIndex:1] isEqualToString:@"/"]) {
-                [documentsURL URLByAppendingPathComponent:[request.destPath substringFromIndex:1]];
+                cachePath = [cachePath stringByAppendingFormat:@"%@",request.destPath];
             }else {
-                [documentsURL URLByAppendingPathComponent:request.destPath];
+                cachePath = [cachePath stringByAppendingFormat:@"%@",[request.destPath substringFromIndex:1]];
             }
         }
+        
+        NSString *lastCharInPrefix = [cachePath substringFromIndex:cachePath.length - 1];
+        if (![lastCharInPrefix isEqualToString:@"/"]) {
+            cachePath = [cachePath stringByAppendingString:@"/"];
+        }
+        
+        NSURL *finalPath = [NSURL fileURLWithPath:cachePath];
+        
         BOOL isDic;
-        BOOL existes = [[NSFileManager defaultManager] fileExistsAtPath:documentsURL.relativePath isDirectory:&isDic];
+        BOOL existes = [[NSFileManager defaultManager] fileExistsAtPath:finalPath.relativePath isDirectory:&isDic];
+        
+        
+            
         if (existes && isDic) {
-            [documentsURL URLByAppendingPathComponent:[NSString stringWithFormat:@"%@",urllastPathComponent]];
+            
+//            [cachePath stringByAppendingPathComponent:urllastPathComponent];
+            cachePath = [cachePath stringByAppendingFormat:@"%@",urllastPathComponent];
+            finalPath = [NSURL fileURLWithPath:cachePath];
         }else if (existes) {
             
         }else {
             NSError *err = nil;
-            [[NSFileManager defaultManager] createDirectoryAtPath:documentsURL.relativePath withIntermediateDirectories:YES attributes:@{} error:&err];
+            [[NSFileManager defaultManager] createDirectoryAtPath:finalPath.relativePath withIntermediateDirectories:YES attributes:@{} error:&err];
             if (err != nil) {
-                [documentsURL URLByAppendingPathComponent:[NSString stringWithFormat:@"%@",urllastPathComponent]];
+                cachePath = [cachePath stringByAppendingFormat:@"%@",urllastPathComponent];
+                finalPath = [NSURL fileURLWithPath:cachePath];
             }
         }
         
-        return documentsURL;
+        return finalPath;
     } completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
         if (success && !error) {
             YKNetworkResponse *response = [[YKNetworkResponse alloc] init];

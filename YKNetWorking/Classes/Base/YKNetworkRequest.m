@@ -8,6 +8,35 @@
 
 #import "YKNetworkRequest.h"
 
+@interface YKNetworkRequest ()
+
+#pragma mark -----------❌unUse❌(后续拓展才会真正使用到，敬请期待)------------
+/** SSL证书 */
+@property (nonatomic, copy) NSString *sslCerPath;
+
+/** 文件名 */
+@property (nonatomic, strong) NSMutableArray<NSString *> *fileName;
+/** 上传的数据 */
+@property (nonatomic, strong) NSMutableArray<NSData *> *data;
+
+/** 文件类型 */
+@property (nonatomic, strong) NSMutableArray<NSString *> *mimeType;
+
+/** 是否需要清理缓存 */
+@property (nonatomic, assign) BOOL clearCache;
+
+/** 忽略最短请求间隔 强制发出请求 */
+@property (nonatomic, assign, getter=isForce) BOOL force;
+
+/** 自定义属性 */
+@property (nonatomic, strong) NSMutableDictionary<NSString *,id<NSCopying>> *customProperty;
+#pragma mark -----------❌unUse❌(后续拓展才会真正使用到，敬请期待)------------
+
+
+
+
+@end
+
 @implementation YKNetworkRequest
 
 - (instancetype)init
@@ -15,6 +44,7 @@
     self = [super init];
     if (self) {
         self.responseType = YKNetworkResponseTypeJSON;
+        self.executeMode = YKNetworkExecuteModeNormal;
         self.disableDynamicParams = NO;
         self.disableDynamicHeader = NO;
         self.disableHandleResponse = NO;
@@ -48,6 +78,7 @@
     request.task = self.task;
     request.downloadTask = self.downloadTask;
     request.handleResponse = self.handleResponse;
+    request.executeMode = self.executeMode;
     return request;
 }
 - (NSMutableDictionary *)params {

@@ -9,12 +9,9 @@
 
 @implementation YKNetWorking (BasePrivate)
 
-
-//MARK: setting
-
 - (BOOL)handleConfigWithRequest:(YKNetworkRequest *)request
 {
-    //TODO:设置请求内容  (暂)
+    //MARK: 请求头预处理
     if (!request.name || request.name.length == 0) {
         request.name = [NSUUID UUID].UUIDString;
     }
@@ -50,6 +47,7 @@
 
 - (void)saveTask:(YKNetworkRequest *)request response:(YKNetworkResponse *)response isException:(BOOL)isException
 {
+    //MARK: 保存响应内容
     //系统回调执行
     if ([YKNetworkingConfig defaultConfig].cacheRequest)
     {
@@ -65,8 +63,7 @@
 - (BOOL)handleError:(YKNetworkRequest *)request response:(YKNetworkResponse *)response isCache:(BOOL)isCache error:(NSError *)error
 {
     
-    //MARK:发生错误时对错误进行处理
-    
+    //MARK: 发生错误时对错误进行处理
     return YES;
 }
 

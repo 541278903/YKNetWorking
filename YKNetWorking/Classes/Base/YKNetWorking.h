@@ -106,12 +106,21 @@ NS_ASSUME_NONNULL_BEGIN
 - (YKNetWorking * (^)(float timeInterval))minRepeatInterval;
 
 /// 需要使用uploadDataSignal进行上传数据
-- (YKNetWorking * (^)(NSData *data,NSString *fileName,NSString *mimeType))uploadData;
+/// @param data 上传时使用的data数据
+/// @param fileName  上传时给与后端的文件名
+/// @param mimeType 上传的mimetype
+/// @param fileFieldName 上传后后端使用的字段名
+/// @warning 调用并设置上传属性本次请求将调整为上传模式
+- (YKNetWorking * _Nonnull (^)(NSData * _Nonnull, NSString * _Nonnull, NSString * _Nonnull, NSString * _Nonnull))uploadData;
 
 /// 文件上传/下载进度
 - (YKNetWorking * (^)(void(^handleProgress)(float progress)))progress;
 
+
 /// 下载目的路径
+/// @param destPath 设置本次下载文件保存的沙盒路劲      把url可下载内容下载到沙盒路劲中
+/// @warning  格式为：
+/// @warning 调用并设置下载路径属性本次请求将调整为下载模式
 - (YKNetWorking *(^)(NSString *destPath))downloadDestPath;
 
 /// 虚拟回调 设置虚拟回调则原本的请求则不会进行请求直接返回虚拟内容
@@ -119,9 +128,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 /** 请求体类型 默认二进制形式 */
 - (YKNetWorking * (^)(YKNetworkRequestParamsType paramsType))paramsType;
-
-/// 上传二进制的内容
-- (YKNetWorking *(^)(NSString *fileField))fileFieldName;
 
 /// 返回内容的格式
 - (YKNetWorking *(^)(YKNetworkResponseType type))responseType;
@@ -146,21 +152,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark -----------非响应式编程可用以下调用常规方法------------
 
-/**
- 执行请求
- */
+
+/// 执行请求
+/// - Parameter executeRequest: 请求回调
+/// - warning 请求会根据请求的模式判断为 普通，上传，下载三种模式
 - (void)executeRequest:(void (^)(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request, NSError * _Nullable error))executeRequest;
 
-
-///**
-// 执行上传文件请求
-// */
-- (void)executeUploadRequest:(void (^)(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request, NSError * _Nullable error))executeUploadRequest;
-
-/**
- 执行上传文件请求
- */
-- (void)executeDownloadRequest:(void (^)(YKNetworkResponse * _Nonnull response, YKNetworkRequest * _Nonnull request, NSError * _Nullable error))executeDownloadRequest;
 
 @end
 
@@ -172,6 +169,6 @@ NS_ASSUME_NONNULL_END
 #import "YKNetWorking/YKBlockTrampoline.h"
 #endif
 
-#if __has_include("YKNetWorking/YKNetWorking+RACExtension.h")
-#import "YKNetWorking/YKNetWorking+RACExtension.h"
+#if __has_include("YKNetWorking/YKNetWorking+RAC.h")
+#import "YKNetWorking/YKNetWorking+RAC.h"
 #endif
